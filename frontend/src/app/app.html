@@ -1,0 +1,29 @@
+<header class="nav">
+  <a class="brand" [routerLink]="auth.user() ? auth.home() : '/login'">Fit<span>Slot</span></a>
+  @if (auth.user(); as u) {
+    <nav class="links">
+      @if (u.role === 'member') {
+        <a routerLink="/book" routerLinkActive="active">Book</a>
+        <a routerLink="/my-bookings" routerLinkActive="active">My bookings</a>
+        <a routerLink="/stats" routerLinkActive="active">Stats</a>
+        <a routerLink="/wallet" routerLinkActive="active">Wallet</a>
+        <a routerLink="/news" routerLinkActive="active">News</a>
+      } @else {
+        <a routerLink="/admin" routerLinkActive="active">Dashboard</a>
+      }
+      <button class="btn" (click)="toggleTheme()" style="margin-left: auto; cursor: pointer;">
+        {{ isLight() ? '🌙 Қараңғы' : '☀️ Жарық' }}
+      </button>
+    </nav>
+    <div class="user">
+      <span class="muted">{{ u.name }} · {{ u.role }}</span>
+      <button class="btn btn-sm" (click)="auth.logout()">Log out</button>
+    </div>
+  }
+</header>
+<main class="container"><router-outlet /></main>
+<div class="toasts" aria-live="polite">
+  @for (t of toast.toasts(); track t.id) {
+    <div class="toast t-{{ t.type }}">{{ t.text }}</div>
+  }
+</div>
