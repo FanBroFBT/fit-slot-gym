@@ -63,7 +63,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
     </div>
 
     @if (trainer(); as t) {
-      <div class="card mt">
+      <div class="card mt" id="schedule">
         <h3>{{ t.full_name }}: choose a day</h3>
         <div class="row">
           @for (d of days; track d.value) {
@@ -75,7 +75,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
         @else {
           <div class="row">
             @for (s of slots(); track s.time) {
-              <button class="chip" [class.on]="time() === s.time" [disabled]="!s.available" (click)="time.set(s.time)">{{ s.time }}</button>
+              <button class="chip" [class.on]="time() === s.time" [disabled]="!s.available" (click)="pickTime(s.time)">{{ s.time }}</button>
             } @empty { <p>No slots on this day.</p> }
           </div>
           <p class="mt-s" style="font-size:.85rem">Crossed-out times are booked or in the past.</p>
@@ -84,7 +84,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
     }
 
     @if (trainer() && time()) {
-      <div class="card mt">
+      <div class="card mt" id="confirm">
         <h3>Confirm and pay</h3>
         <p>{{ trainer()!.full_name }} · {{ date() }} {{ time() }} · <b>{{ method === 'Membership' ? 'free' : '5000 KZT' }}</b></p>
         <label for="m">Payment method</label>
@@ -302,7 +302,12 @@ export class BookComponent implements OnInit {
   initials(name: string) { return name.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase(); }
   photoFailed(t: Trainer) { this.failed.update(s => new Set(s).add(t.trainer_id)); }
 
-  pick(t: Trainer) { this.trainer.set(t); this.time.set(null); this.error.set(null); this.loadSlots(); }
+    private scrollTo(id: string) {
+    setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  }
+
+  pick(t: Trainer) { this.trainer.set(t); this.time.set(null); this.error.set(null); this.loadSlots(); this.scrollTo('schedule'); }
+  pickTime(v: string) { this.time.set(v); this.scrollTo('confirm'); }
   setDate(v: string) { this.date.set(v); this.time.set(null); this.error.set(null); this.loadSlots(); }
 
   showTrainerDetails(t: Trainer) {

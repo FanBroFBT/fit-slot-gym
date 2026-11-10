@@ -57,3 +57,5 @@ body {
   border-color: var(--border-color) !important;
   color: var(--text-color) !important;
 }
+
+#schedule, #confirm { scroll-margin-top: 90px; }
