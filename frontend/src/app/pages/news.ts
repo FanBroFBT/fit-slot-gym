@@ -1,28 +1,28 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { I18nService } from '../core/i18n.service';
 
 @Component({
   selector: 'app-news',
-  standalone: true,
   imports: [CommonModule],
   template: `
     <div class="container" style="padding: 30px 0; max-width: 1200px; margin: 0 auto;">
       <div style="margin-bottom: 32px; text-align: center;">
-        <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">📰 Club News & Special Offers</h2>
-        <p style="color: #94a3b8; font-size: 1.05rem;">Stay updated with our latest gym equipment, professional masterclasses, and seasonal discounts.</p>
+        <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ i18n.t('NEWS_MAIN_TITLE') }}</h2>
+        <p style="color: #94a3b8; font-size: 1.05rem;">{{ i18n.t('NEWS_MAIN_SUBTITLE') }}</p>
       </div>
       
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 28px;">
-        @for (item of newsList(); track item.title) {
+        @for (item of newsList(); track item.titleKey) {
           <div class="news-card">
             <div class="image-container">
-              <img [src]="item.image" [alt]="item.title" loading="lazy">
-              <span class="category-badge">{{ item.category }}</span>
+              <img [src]="item.image" [alt]="i18n.t(item.titleKey)" loading="lazy">
+              <span class="category-badge">{{ i18n.t(item.catKey) }}</span>
             </div>
             <div class="card-content">
-              <span class="news-date">📅 {{ item.date }}</span>
-              <h3 class="news-title">{{ item.title }}</h3>
-              <p class="news-desc">{{ item.description }}</p>
+              <span class="news-date">📅 {{ i18n.t(item.dateKey) }}</span>
+              <h3 class="news-title">{{ i18n.t(item.titleKey) }}</h3>
+              <p class="news-desc">{{ i18n.t(item.descKey) }}</p>
             </div>
           </div>
         }
@@ -101,76 +101,78 @@ import { CommonModule } from '@angular/common';
   `
 })
 export class NewsComponent {
-  newsList = signal([
+  protected i18n = inject(I18nService);
+
+  newsList = computed(() => [
     {
-      title: "🔥 New Premium Equipment Arrived!",
-      description: "The latest line of world-class strength and cardio machines has been installed in our gym. Come and test them out today!",
-      date: "May 15, 2026",
-      category: "Equipment",
-      image: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2"
+      titleKey: 'NEWS_1_TITLE',
+      descKey: 'NEWS_1_DESC',
+      dateKey: 'NEWS_1_DATE',
+      catKey: 'CAT_EQUIPMENT',
+      image: 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2'
     },
     {
-      title: "🎉 Summer Season: 20% Off Memberships!",
-      description: "Get a 20% discount on all 3-month and 6-month memberships until the end of May. Bring a friend and train together!",
-      date: "May 10, 2026",
-      category: "Special Offer",
-      image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48"
+      titleKey: 'NEWS_2_TITLE',
+      descKey: 'NEWS_2_DESC',
+      dateKey: 'NEWS_2_DATE',
+      catKey: 'CAT_SPECIAL',
+      image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48'
     },
     {
-      title: "🧘‍♀️ New Yoga & Pilates Classes",
-      description: "Registration for our new morning and evening group sessions is now open. Limited slots available per group.",
-      date: "May 5, 2026",
-      category: "Classes",
-      image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773"
+      titleKey: 'NEWS_3_TITLE',
+      descKey: 'NEWS_3_DESC',
+      dateKey: 'NEWS_3_DATE',
+      catKey: 'CAT_CLASSES',
+      image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773'
     },
     {
-      title: "💪 Professional Trainer Workshop",
-      description: "Join our masterclass on proper nutrition and muscle recovery techniques this Saturday with our lead instructors.",
-      date: "April 28, 2026",
-      category: "Workshop",
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b"
+      titleKey: 'NEWS_4_TITLE',
+      descKey: 'NEWS_4_DESC',
+      dateKey: 'NEWS_4_DATE',
+      catKey: 'CAT_WORKSHOP',
+      image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b'
     },
     {
-      title: "🥤 Protein Bar Grand Opening",
-      description: "Our brand new healthy smoothie and protein bar is officially open in the lobby. Refresh yourself after a hard workout!",
-      date: "April 20, 2026",
-      category: "Facilities",
-      image: "https://images.unsplash.com/photo-1556910103-1c02745aae4d"
+      titleKey: 'NEWS_5_TITLE',
+      descKey: 'NEWS_5_DESC',
+      dateKey: 'NEWS_5_DATE',
+      catKey: 'CAT_FACILITIES',
+      image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d'
     },
     {
-      title: "🥊 Ultimate Boxing Championship Night",
-      description: "Watch our club members compete in an amateur showcase match this Friday night. Free entry for all active members!",
-      date: "April 15, 2026",
-      category: "Event",
-      image: "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed"
+      titleKey: 'NEWS_6_TITLE',
+      descKey: 'NEWS_6_DESC',
+      dateKey: 'NEWS_6_DATE',
+      catKey: 'CAT_EVENT',
+      image: 'https://images.unsplash.com/photo-1549719386-74dfcbf7dbed'
     },
     {
-      title: "🍏 Free Nutritional Consultation Week",
-      description: "Book a 30-minute free body composition analysis and diet planning session with our certified sports nutritionists.",
-      date: "April 10, 2026",
-      category: "Health",
-      image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061"
+      titleKey: 'NEWS_7_TITLE',
+      descKey: 'NEWS_7_DESC',
+      dateKey: 'NEWS_7_DATE',
+      catKey: 'CAT_HEALTH',
+      image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061'
     },
     {
-      title: "🏊‍♂️ Indoor Pool Renovation Update",
-      description: "Our swimming pool facilities have undergone a complete modern upgrade with state-of-the-art water purification systems.",
-      date: "April 2, 2026",
-      category: "Update",
-      image: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7"
+      titleKey: 'NEWS_8_TITLE',
+      descKey: 'NEWS_8_DESC',
+      dateKey: 'NEWS_8_DATE',
+      catKey: 'CAT_UPDATE',
+      image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7'
     },
     {
-      title: "🏆 Annual Powerlifting Tournament",
-      description: "Test your strength against the best! Register now for the upcoming bench press and squat competition next month.",
-      date: "March 25, 2026",
-      category: "Competition",
-      image: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd"
+      titleKey: 'NEWS_9_TITLE',
+      descKey: 'NEWS_9_DESC',
+      dateKey: 'NEWS_9_DATE',
+      catKey: 'CAT_COMPITION',
+      image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd'
     },
     {
-      title: "🌙 Extended Working Hours",
-      description: "Due to popular demand, our main gym facility will now stay open until midnight every Friday and Saturday.",
-      date: "March 18, 2026",
-      category: "Schedule",
-      image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48"
+      titleKey: 'NEWS_10_TITLE',
+      descKey: 'NEWS_10_DESC',
+      dateKey: 'NEWS_10_DATE',
+      catKey: 'CAT_SCHEDULE',
+      image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48'
     }
   ]);
 }

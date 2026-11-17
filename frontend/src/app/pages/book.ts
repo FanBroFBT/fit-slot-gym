@@ -7,6 +7,7 @@ import { ApiService } from '../core/api.service';
 import { StarsComponent } from '../core/stars';
 import { ApiError, Booking, Slot, Trainer, TrainerReviews, Wallet } from '../core/models';
 import { ToastService } from '../core/toast.service';
+import { I18nService } from '../core/i18n.service'; // <-- Yol farklıysa düzelt (ör. '../services/i18n.service')
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -15,17 +16,17 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
   selector: 'app-book',
   imports: [FormsModule, DatePipe, RouterLink, StarsComponent],
   template: `
-  <h2>Book a training session</h2>
-  <p>Step {{ step() }} of 3: {{ ['Choose a trainer', 'Choose date and time', 'Confirm and pay'][step() - 1] }}</p>
+  <h2>{{ i18n.t('BOOK_TITLE') }}</h2>
+  <p>{{ i18n.t('BOOK_STEP') }} {{ step() }} {{ i18n.t('BOOK_OF_3') }}: {{ [i18n.t('STEP_1_LABEL'), i18n.t('STEP_2_LABEL'), i18n.t('STEP_3_LABEL')][step() - 1] }}</p>
 
   @if (result(); as r) {
     <div class="card alert-ok" style="text-align:center;padding:40px">
-      <h1 class="accent">Booked ✓</h1>
-      <p>Booking <b>{{ r.booking_id }}</b> with {{ r.trainer_name }}</p>
+      <h1 class="accent">{{ i18n.t('BOOKED_SUCCESS') }}</h1>
+      <p>{{ i18n.t('BOOKING_ID') }} <b>{{ r.booking_id }}</b> {{ i18n.t('BOOKING_WITH') }} {{ r.trainer_name }}</p>
       <p>{{ r.session_start | date: 'EEEE d MMMM, HH:mm' }} · {{ r.amount_kzt }} KZT {{ r.payment_status }}</p>
       <div class="row" style="justify-content:center">
-        <a class="btn btn-primary" routerLink="/my-bookings">My bookings</a>
-        <button class="btn" (click)="reset()">Book another</button>
+        <a class="btn btn-primary" routerLink="/my-bookings">{{ i18n.t('NAV_MY_BOOKINGS') }}</a>
+        <button class="btn" (click)="reset()">{{ i18n.t('BOOK_ANOTHER') }}</button>
       </div>
     </div>
   } @else {
@@ -40,64 +41,66 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
             }
           </div>
           <div class="trainer-info">
-            <span class="badge-speciality">{{ t.specialization }}</span>
+            <span class="badge-speciality">{{ i18n.tSpec(t.specialization) }}</span>
             <h3 class="trainer-name">{{ t.full_name }}</h3>
             <p class="trainer-rating">
               @if (t.reviews_count) { <app-stars [value]="t.avg_rating" /> <b>{{ t.avg_rating }}</b> <span class="muted">({{ t.reviews_count }})</span> }
-              @else { <span class="muted">No reviews yet</span> }
+              @else { <span class="muted">{{ i18n.t('NO_REVIEWS') }}</span> }
             </p>
             <p class="trainer-hours">🕒 {{ t.working_hours }}</p>
           </div>
-          <button class="btn-book" (click)="$event.stopPropagation(); pick(t)">Book</button>
-          <button class="btn-details" (click)="$event.stopPropagation(); showTrainerDetails(t)">Толығырақ көру</button>
+          <button class="btn-book" (click)="$event.stopPropagation(); pick(t)">{{ i18n.t('BTN_BOOK') }}</button>
+          <button class="btn-details" (click)="$event.stopPropagation(); showTrainerDetails(t)">{{ i18n.t('BTN_VIEW_DETAILS') }}</button>
         </div>
       } @empty { <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div> }
     </div>
 
     @if (trainer(); as t) {
       <div class="card mt" id="schedule">
-        <h3>{{ t.full_name }}: choose a day</h3>
+        <h3>{{ t.full_name }}: {{ i18n.t('CHOOSE_DAY') }}</h3>
         <div class="row">
-          @for (d of days; track d.value) {
+          @for (d of days(); track d.value) {
             <button class="chip" [class.on]="date() === d.value" (click)="setDate(d.value)">{{ d.label }}</button>
           }
         </div>
-        <h3 class="mt">Time</h3>
+        <h3 class="mt">{{ i18n.t('TIME_LABEL') }}</h3>
         @if (loading()) { <div class="skeleton" style="height:56px"></div> }
         @else {
           <div class="row">
             @for (s of slots(); track s.time) {
               <button class="chip" [class.on]="time() === s.time" [disabled]="!s.available" (click)="pickTime(s.time)">{{ s.time }}</button>
-            } @empty { <p>No slots on this day.</p> }
+            } @empty { <p>{{ i18n.t('NO_SLOTS') }}</p> }
           </div>
-          <p class="mt-s" style="font-size:.85rem">Crossed-out times are booked or in the past.</p>
+          <p class="mt-s" style="font-size:.85rem">{{ i18n.t('CROSSED_OUT_HINT') }}</p>
         }
       </div>
     }
 
     @if (trainer() && time()) {
       <div class="card mt" id="confirm">
-        <h3>Confirm and pay</h3>
-        <p>{{ trainer()!.full_name }} · {{ date() }} {{ time() }} · <b>{{ method === 'Membership' ? 'free' : '5000 KZT' }}</b></p>
-        <label for="m">Payment method</label>
+        <h3>{{ i18n.t('CONFIRM_AND_PAY') }}</h3>
+        <p>{{ trainer()!.full_name }} · {{ date() }} {{ time() }} · <b>{{ method === 'Membership' ? i18n.t('FREE_LABEL') : '5000 KZT' }}</b></p>
+        <label for="m">{{ i18n.t('PAYMENT_METHOD') }}</label>
         <select id="m" [(ngModel)]="method">
-          @if (wallet()?.has_subscription) { <option value="Membership">Subscription (free)</option> }
-          <option value="Wallet">Wallet ({{ wallet()?.balance_kzt ?? 0 }} KZT)</option>
-          <option>Card</option><option>Kaspi</option><option>Cash</option>
+          @if (wallet()?.has_subscription) { <option value="Membership">{{ i18n.t('PAY_SUBSCRIPTION') }}</option> }
+          <option value="Wallet">{{ i18n.t('PAY_WALLET') }} ({{ wallet()?.balance_kzt ?? 0 }} KZT)</option>
+          <option value="Card">{{ i18n.t('PAY_CARD') }}</option>
+          <option value="Kaspi">Kaspi</option>
+          <option value="Cash">{{ i18n.t('PAY_CASH') }}</option>
         </select>
         <label class="row" style="margin-top:14px"><input type="checkbox" style="width:auto" [(ngModel)]="simulateFailure" />
-          Demo: simulate payment failure (booking must be rolled back)</label>
+          {{ i18n.t('SIMULATE_FAILURE') }}</label>
         @if (error(); as e) {
           <div class="alert alert-error mt-s"><b>{{ e.message }}</b>
-            @if (e.error === 'insufficient_funds' || e.error === 'no_subscription') { <a routerLink="/wallet" class="accent"> Open wallet →</a> }
+            @if (e.error === 'insufficient_funds' || e.error === 'no_subscription') { <a routerLink="/wallet" class="accent"> {{ i18n.t('OPEN_WALLET') }}</a> }
             @if (e.alternatives?.length) {
-              <div class="row mt-s">Free times:
+              <div class="row mt-s">{{ i18n.t('FREE_TIMES') }}
                 @for (a of e.alternatives; track a) { <button class="chip" (click)="useAlternative(a)">{{ a }}</button> }
               </div>
             }
           </div>
         }
-        <button class="btn btn-primary mt" [disabled]="busy()" (click)="confirm()">{{ busy() ? 'Booking…' : 'Confirm booking' }}</button>
+        <button class="btn btn-primary mt" [disabled]="busy()" (click)="confirm()">{{ busy() ? i18n.t('BOOKING_BUSY') : i18n.t('CONFIRM_BOOKING') }}</button>
       </div>
     }
   }
@@ -111,19 +114,19 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
           <div class="photo-fallback" style="height:220px;border-radius:8px;margin-bottom:15px">{{ initials(st.full_name) }}</div>
         }
         <h2 style="margin-bottom: 5px;">{{ st.full_name }}</h2>
-        <span class="badge b-Completed" style="display: inline-block; margin-bottom: 10px;">{{ st.specialization }}</span>
-        <p style="margin: 8px 0;"><b>Жұмыс уақыты:</b> {{ st.working_hours }}</p>
-        <p style="margin: 8px 0;"><b>Байланыс телефоны:</b> {{ st.phone }}</p>
-        <p style="margin: 8px 0;"><b>Rating:</b>
-          @if (reviews(); as r) { @if (r.reviews_count) { <app-stars [value]="r.avg_rating" /> {{ r.avg_rating }} / 5 ({{ r.reviews_count }} reviews) } @else { no reviews yet } }
+        <span class="badge b-Completed" style="display: inline-block; margin-bottom: 10px;">{{ i18n.tSpec(st.specialization) }}</span>
+        <p style="margin: 8px 0;"><b>{{ i18n.t('WORKING_HOURS') }}</b> {{ st.working_hours }}</p>
+        <p style="margin: 8px 0;"><b>{{ i18n.t('PHONE_LABEL') }}</b> {{ st.phone }}</p>
+        <p style="margin: 8px 0;"><b>{{ i18n.t('RATING_LABEL') }}</b>
+          @if (reviews(); as r) { @if (r.reviews_count) { <app-stars [value]="r.avg_rating" /> {{ r.avg_rating }} / 5 ({{ r.reviews_count }} {{ i18n.t('REVIEWS_WORD') }}) } @else { {{ i18n.t('NO_REVIEWS') }} } }
         </p>
         <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0;">
         <p style="font-size: 0.95rem; color: #94a3b8; line-height: 1.5;">
-          <b>Тәжірибесі мен жетістіктері:</b> Бұл тренер өз саласында 5 жылдан астам уақыт жұмыс істейді. Кәсіби спортшыларды дайындап, әр клиенттің жеке физикалық ерекшеліктеріне қарай арнайы бағдарлама құрады.
+          <b>{{ i18n.t('EXPERIENCE_TITLE') }}</b> {{ i18n.t('EXPERIENCE_DESC') }}
         </p>
         @if (reviews(); as r) {
           @if (r.reviews.length) {
-            <h3 style="margin-top:16px">Member reviews</h3>
+            <h3 style="margin-top:16px">{{ i18n.t('MEMBER_REVIEWS') }}</h3>
             <div class="reviews">
               @for (rv of r.reviews; track rv.id) {
                 <div class="review"><div class="row between"><b>{{ rv.member_name }}</b><app-stars [value]="rv.rating" /></div>
@@ -133,7 +136,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
             </div>
           }
         }
-        <button class="btn btn-primary mt" style="width: 100%; margin-top: 20px;" (click)="selectedTrainer.set(null)">Жабу</button>
+        <button class="btn btn-primary mt" style="width: 100%; margin-top: 20px;" (click)="selectedTrainer.set(null)">{{ i18n.t('BTN_CLOSE') }}</button>
       </div>
     </div>
   }`,
@@ -185,6 +188,7 @@ export class BookComponent implements OnInit {
   private api = inject(ApiService);
   private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
+  readonly i18n = inject(I18nService);
 
   trainers = signal<Trainer[]>([]);
   wallet = signal<Wallet | null>(null);
@@ -193,11 +197,17 @@ export class BookComponent implements OnInit {
   trainer = signal<Trainer | null>(null);
   selectedTrainer = signal<Trainer | null>(null);
 
-  days = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() + i);
-    return { value: iso(d), label: d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) };
+  days = computed(() => {
+    const localeMap = { kk: 'kk-KZ', ru: 'ru-RU', en: 'en-GB' } as const;
+    const locale = localeMap[this.i18n.lang()];
+    return Array.from({ length: 14 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      return { value: iso(d), label: d.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' }) };
+    });
   });
-  date = signal(this.days[0].value);
+
+  date = signal(iso(new Date()));
   slots = signal<Slot[]>([]);
   time = signal<string | null>(null);
   loading = signal(false); busy = signal(false);
@@ -248,7 +258,7 @@ export class BookComponent implements OnInit {
     this.loading.set(true);
     this.api.slots(t.trainer_id, this.date()).subscribe({
       next: r => { this.slots.set(r.slots); this.loading.set(false); },
-      error: () => { this.loading.set(false); this.toast.show('Could not load time slots', 'error'); }
+      error: () => { this.loading.set(false); this.toast.show(this.i18n.t('ERR_SLOTS'), 'error'); }
     });
   }
 
@@ -265,10 +275,10 @@ export class BookComponent implements OnInit {
       trainer_id: t.trainer_id, session_start: `${this.date()} ${time}`,
       payment_method: this.method, simulate_payment_failure: this.simulateFailure
     }).subscribe({
-      next: b => { this.busy.set(false); this.result.set(b); this.loadWallet(); this.toast.show('Booking saved', 'success'); },
+      next: b => { this.busy.set(false); this.result.set(b); this.loadWallet(); this.toast.show(this.i18n.t('TOAST_BOOKING_SAVED'), 'success'); },
       error: (e: HttpErrorResponse) => {
         this.busy.set(false);
-        this.error.set((e.error as ApiError)?.message ? e.error as ApiError : { error: 'network', message: 'Server is not reachable.' });
+        this.error.set((e.error as ApiError)?.message ? e.error as ApiError : { error: 'network', message: this.i18n.t('ERR_SERVER') });
         this.time.set(null); this.loadSlots(); this.loadWallet();
       }
     });

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { ApiError } from '../core/models';
 import { ToastService } from '../core/toast.service';
+import { I18nService } from '../core/i18n.service';
 
 export interface PasswordRules {
   minLength: boolean;
@@ -44,29 +45,29 @@ export function isPasswordStrong(password: string, email = '', fullName = ''): b
   template: `
   <section class="hero">
     <div>
-      <p class="accent" style="font-weight:600">GYM BOOKING SYSTEM</p>
-      <h1>Book your trainer in 3 clicks. <span class="accent">Never double-booked.</span></h1>
-      <p>Live availability, instant confirmation and one rule the database never breaks: one trainer, one slot.</p>
-      <div class="row mt-s muted"><span>✔ Live slots</span><span>✔ Instant booking</span><span>✔ 24/7 access pass</span></div>
+      <p class="accent" style="font-weight:600">{{ i18n.t('SYS_NAME') }}</p>
+      <h1>{{ i18n.t('HERO_TITLE_1') }} <span class="accent">{{ i18n.t('HERO_TITLE_ACCENT') }}</span></h1>
+      <p>{{ i18n.t('HERO_DESC') }}</p>
+      <div class="row mt-s muted"><span>{{ i18n.t('FEAT_1') }}</span><span>{{ i18n.t('FEAT_2') }}</span><span>{{ i18n.t('FEAT_3') }}</span></div>
     </div>
     <div class="card">
       <div class="row">
-        <button type="button" class="chip" [class.on]="mode() === 'login'" (click)="switchMode('login')">Log in</button>
-        <button type="button" class="chip" [class.on]="mode() === 'register'" (click)="switchMode('register')">Sign up</button>
+        <button type="button" class="chip" [class.on]="mode() === 'login'" (click)="switchMode('login')">{{ i18n.t('TAB_LOGIN') }}</button>
+        <button type="button" class="chip" [class.on]="mode() === 'register'" (click)="switchMode('register')">{{ i18n.t('TAB_REGISTER') }}</button>
       </div>
       <form (ngSubmit)="submit()">
         @if (mode() === 'register') {
-          <label for="n">Full name</label>
+          <label for="n">{{ i18n.t('FULL_NAME') }}</label>
           <input id="n" name="n" [(ngModel)]="fullName" required />
 
-          <label for="p">Phone</label>
+          <label for="p">{{ i18n.t('PHONE') }}</label>
           <input id="p" name="p" [(ngModel)]="phone" required />
         }
 
-        <label for="e">Email</label>
+        <label for="e">{{ i18n.t('EMAIL') }}</label>
         <input id="e" name="e" type="email" [(ngModel)]="email" required />
 
-        <label for="pw">Password</label>
+        <label for="pw">{{ i18n.t('PASSWORD') }}</label>
         <div class="pwd-wrap">
           <input
             id="pw"
@@ -76,12 +77,12 @@ export function isPasswordStrong(password: string, email = '', fullName = ''): b
             required
           />
           <button type="button" class="btn btn-sm pwd-toggle" (click)="showPassword.set(!showPassword())">
-            {{ showPassword() ? 'Hide' : 'Show' }}
+            {{ showPassword() ? i18n.t('BTN_HIDE') : i18n.t('BTN_SHOW') }}
           </button>
         </div>
 
         @if (mode() === 'register') {
-          <label for="cpw">Confirm password</label>
+          <label for="cpw">{{ i18n.t('CONFIRM_PASSWORD') }}</label>
           <input
             id="cpw"
             name="cpw"
@@ -91,14 +92,14 @@ export function isPasswordStrong(password: string, email = '', fullName = ''): b
           />
 
           <div class="pwd-rules mt-s">
-            <p class="rules-title">Password security requirements:</p>
+            <p class="rules-title">{{ i18n.t('PWD_RULES_TITLE') }}</p>
             <ul>
-              <li [class.valid]="pwdRules.minLength">{{ pwdRules.minLength ? '✔' : '○' }} 8–64 characters</li>
-              <li [class.valid]="pwdRules.hasUpper">{{ pwdRules.hasUpper ? '✔' : '○' }} At least 1 uppercase letter (A–Z)</li>
-              <li [class.valid]="pwdRules.hasLower">{{ pwdRules.hasLower ? '✔' : '○' }} At least 1 lowercase letter (a–z)</li>
-              <li [class.valid]="pwdRules.hasDigit">{{ pwdRules.hasDigit ? '✔' : '○' }} At least 1 digit (0–9)</li>
-              <li [class.valid]="pwdRules.hasSpecial">{{ pwdRules.hasSpecial ? '✔' : '○' }} At least 1 special character (!&#64;#$%...)</li>
-              <li [class.valid]="pwdRules.notPersonal">{{ pwdRules.notPersonal ? '✔' : '○' }} Does not contain your email or name</li>
+              <li [class.valid]="pwdRules.minLength">{{ pwdRules.minLength ? '✔' : '○' }} {{ i18n.t('RULE_LENGTH') }}</li>
+              <li [class.valid]="pwdRules.hasUpper">{{ pwdRules.hasUpper ? '✔' : '○' }} {{ i18n.t('RULE_UPPER') }}</li>
+              <li [class.valid]="pwdRules.hasLower">{{ pwdRules.hasLower ? '✔' : '○' }} {{ i18n.t('RULE_LOWER') }}</li>
+              <li [class.valid]="pwdRules.hasDigit">{{ pwdRules.hasDigit ? '✔' : '○' }} {{ i18n.t('RULE_DIGIT') }}</li>
+              <li [class.valid]="pwdRules.hasSpecial">{{ pwdRules.hasSpecial ? '✔' : '○' }} {{ i18n.t('RULE_SPECIAL') }}</li>
+              <li [class.valid]="pwdRules.notPersonal">{{ pwdRules.notPersonal ? '✔' : '○' }} {{ i18n.t('RULE_PERSONAL') }}</li>
             </ul>
           </div>
         }
@@ -110,14 +111,14 @@ export function isPasswordStrong(password: string, email = '', fullName = ''): b
           style="width:100%"
           [disabled]="busy() || (mode() === 'register' && !canRegister)"
         >
-          {{ mode() === 'login' ? 'Log in' : 'Create account' }}
+          {{ mode() === 'login' ? i18n.t('BTN_LOGIN') : i18n.t('BTN_REGISTER') }}
         </button>
       </form>
 
-      <p class="mt muted" style="font-size:.85rem">Demo accounts:</p>
+      <p class="mt muted" style="font-size:.85rem">{{ i18n.t('DEMO_ACCOUNTS') }}</p>
       <div class="row">
-        <button class="btn btn-sm" type="button" (click)="demo('member@gym.kz', 'member123')">Member</button>
-        <button class="btn btn-sm" type="button" (click)="demo('admin@gym.kz', 'admin123')">Admin</button>
+        <button class="btn btn-sm" type="button" (click)="demo('member@gym.kz', 'member123')">{{ i18n.t('DEMO_MEMBER') }}</button>
+        <button class="btn btn-sm" type="button" (click)="demo('admin@gym.kz', 'admin123')">{{ i18n.t('DEMO_ADMIN') }}</button>
       </div>
     </div>
   </section>`,
@@ -138,6 +139,7 @@ export class LoginComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private toast = inject(ToastService);
+  protected i18n = inject(I18nService);
 
   mode = signal<'login' | 'register'>('login');
   showPassword = signal(false);
@@ -181,11 +183,11 @@ export class LoginComponent {
 
     if (this.mode() === 'register') {
       if (!isPasswordStrong(this.password, this.email, this.fullName)) {
-        this.error.set('Password must be 8+ chars with uppercase, lowercase, digit, and special character.');
+        this.error.set(this.i18n.t('ERR_WEAK_PASSWORD'));
         return;
       }
       if (this.password !== this.confirmPassword) {
-        this.error.set('Passwords do not match.');
+        this.error.set(this.i18n.t('ERR_PASSWORDS_MISMATCH'));
         return;
       }
     }
@@ -203,7 +205,7 @@ export class LoginComponent {
     request.subscribe({
       next: info => {
         this.busy.set(false);
-        this.toast.show(`Welcome, ${info.name}`, 'success');
+        this.toast.show(`${this.i18n.t('WELCOME_PREFIX')}${info.name}`, 'success');
         this.router.navigate([this.auth.home()]);
       },
       error: (e: HttpErrorResponse) => {
@@ -213,7 +215,7 @@ export class LoginComponent {
           body?.message ||
           body?.detail ||
           (Array.isArray(body?.password) ? body.password[0] : null);
-        this.error.set(validationMsg ?? 'Server is not reachable. Is the backend running?');
+        this.error.set(validationMsg ?? this.i18n.t('ERR_SERVER_UNREACHABLE'));
       },
     });
   }

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ApiService } from '../core/api.service';
 import { Trainer, TrainerReviews } from '../core/models';
 import { StarsComponent } from '../core/stars';
+import { I18nService } from '../core/i18n.service'; // <-- Yol farklıysa düzelt
 
 @Component({
   selector: 'app-trainers',
@@ -12,13 +13,13 @@ import { StarsComponent } from '../core/stars';
   template: `
   <div class="row between" style="flex-wrap: wrap; gap: 12px;">
     <div>
-      <h2>Our trainers</h2>
-      <p class="muted">Explore trainer profiles, ratings, schedules, and member reviews.</p>
+      <h2>{{ i18n.t('TRAINERS_TITLE') }}</h2>
+      <p class="muted">{{ i18n.t('TRAINERS_SUBTITLE') }}</p>
     </div>
     <input
       style="max-width: 260px;"
       type="search"
-      placeholder="Search trainer or specialty..."
+      [placeholder]="i18n.t('SEARCH_TRAINER_PLACEHOLDER')"
       [ngModel]="query()"
       (ngModelChange)="query.set($event)"
     />
@@ -27,10 +28,10 @@ import { StarsComponent } from '../core/stars';
   <!-- Мамандық бойынша сүзгі -->
   <div class="row mt-s" style="flex-wrap: wrap;">
     <button class="chip" [class.on]="spec() === 'ALL'" (click)="spec.set('ALL')">
-      All ({{ trainers().length }})
+      {{ i18n.t('FILTER_ALL') }} ({{ trainers().length }})
     </button>
     @for (s of specializations(); track s) {
-      <button class="chip" [class.on]="spec() === s" (click)="spec.set(s)">{{ s }}</button>
+      <button class="chip" [class.on]="spec() === s" (click)="spec.set(s)">{{ i18n.tSpec(s) }}</button>
     }
   </div>
 
@@ -48,7 +49,7 @@ import { StarsComponent } from '../core/stars';
             } @else {
               <div class="photo-fallback">{{ initials(t.full_name) }}</div>
             }
-            <span class="spec-pill">{{ t.specialization }}</span>
+            <span class="spec-pill">{{ i18n.tSpec(t.specialization) }}</span>
           </div>
 
           <div class="card-body">
@@ -59,7 +60,7 @@ import { StarsComponent } from '../core/stars';
                 <b>{{ t.avg_rating }}</b>
                 <span class="muted">({{ t.reviews_count }})</span>
               } @else {
-                <span class="muted">No reviews yet</span>
+                <span class="muted">{{ i18n.t('NO_REVIEWS') }}</span>
               }
             </div>
 
@@ -69,13 +70,13 @@ import { StarsComponent } from '../core/stars';
             </div>
 
             <div class="row mt" style="gap: 8px; margin-top: auto;">
-              <button class="btn" style="flex: 1;" (click)="openProfile(t)">View profile</button>
-              <button class="btn btn-primary" style="flex: 1;" (click)="bookWith(t)">Book</button>
+              <button class="btn" style="flex: 1;" (click)="openProfile(t)">{{ i18n.t('BTN_VIEW_PROFILE') }}</button>
+              <button class="btn btn-primary" style="flex: 1;" (click)="bookWith(t)">{{ i18n.t('BTN_BOOK') }}</button>
             </div>
           </div>
         </div>
       } @empty {
-        <div class="card muted">No trainers match your filter.</div>
+        <div class="card muted">{{ i18n.t('NO_TRAINERS_MATCH') }}</div>
       }
     </div>
   }
@@ -93,29 +94,29 @@ import { StarsComponent } from '../core/stars';
         <div class="row between" style="align-items: flex-start;">
           <div>
             <h2 style="margin: 0;">{{ tr.full_name }}</h2>
-            <span class="badge b-Active" style="display: inline-block; margin-top: 6px;">{{ tr.specialization }}</span>
+            <span class="badge b-Active" style="display: inline-block; margin-top: 6px;">{{ i18n.tSpec(tr.specialization) }}</span>
           </div>
           <button class="btn btn-sm" (click)="selected.set(null)">✕</button>
         </div>
 
         <div class="meta mt-s">
-          <p><b>Working hours:</b> {{ tr.working_hours || '09:00 – 21:00' }}</p>
-          <p><b>Phone:</b> {{ tr.phone || '—' }}</p>
+          <p><b>{{ i18n.t('WORKING_HOURS') }}</b> {{ tr.working_hours || '09:00 – 21:00' }}</p>
+          <p><b>{{ i18n.t('PHONE_LABEL') }}</b> {{ tr.phone || '—' }}</p>
           <p>
-            <b>Rating:</b>
+            <b>{{ i18n.t('RATING_LABEL') }}</b>
             @if (reviews(); as rv) {
               @if (rv.reviews_count) {
-                <app-stars [value]="rv.avg_rating" /> {{ rv.avg_rating }} / 5 ({{ rv.reviews_count }} reviews)
+                <app-stars [value]="rv.avg_rating" /> {{ rv.avg_rating }} / 5 ({{ rv.reviews_count }} {{ i18n.t('REVIEWS_WORD') }})
               } @else {
-                <span class="muted">No reviews yet</span>
+                <span class="muted">{{ i18n.t('NO_REVIEWS') }}</span>
               }
             }
           </p>
         </div>
 
-        <h3 class="mt">Member reviews</h3>
+        <h3 class="mt">{{ i18n.t('MEMBER_REVIEWS') }}</h3>
         @if (loadingReviews()) {
-          <p class="muted">Loading reviews…</p>
+          <p class="muted">{{ i18n.t('LOADING_REVIEWS') }}</p>
         } @else if (reviews(); as rv) {
           @if (rv.reviews.length) {
             <div class="reviews-list">
@@ -133,13 +134,13 @@ import { StarsComponent } from '../core/stars';
               }
             </div>
           } @else {
-            <p class="muted">No reviews yet. Book a session and leave the first review!</p>
+            <p class="muted">{{ i18n.t('NO_REVIEWS_CTA') }}</p>
           }
         }
 
         <div class="row mt" style="justify-content: flex-end; gap: 10px;">
-          <button class="btn" (click)="selected.set(null)">Close</button>
-          <button class="btn btn-primary" (click)="bookWith(tr)">Book session</button>
+          <button class="btn" (click)="selected.set(null)">{{ i18n.t('BTN_CLOSE') }}</button>
+          <button class="btn btn-primary" (click)="bookWith(tr)">{{ i18n.t('BTN_BOOK_SESSION') }}</button>
         </div>
       </div>
     </div>
@@ -172,6 +173,7 @@ import { StarsComponent } from '../core/stars';
 export class TrainersComponent implements OnInit {
   private api = inject(ApiService);
   private router = inject(Router);
+  readonly i18n = inject(I18nService);
 
   trainers = signal<Trainer[]>([]);
   loading = signal(true);
@@ -192,10 +194,12 @@ export class TrainersComponent implements OnInit {
     const q = this.query().trim().toLowerCase();
     return this.trainers().filter(t => {
       const matchSpec = s === 'ALL' || t.specialization === s;
+      const localizedSpec = this.i18n.tSpec(t.specialization).toLowerCase();
       const matchQuery =
         !q ||
         t.full_name.toLowerCase().includes(q) ||
-        t.specialization.toLowerCase().includes(q);
+        t.specialization.toLowerCase().includes(q) ||
+        localizedSpec.includes(q);
       return matchSpec && matchQuery;
     });
   });

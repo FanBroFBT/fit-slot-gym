@@ -8,6 +8,7 @@ import { AuthService } from '../core/auth.service';
 import { Member, MyStats, Wallet } from '../core/models';
 import { ToastService } from '../core/toast.service';
 import { PasswordRules, checkPasswordRules, isPasswordStrong } from './login';
+import { I18nService } from '../core/i18n.service';
 
 interface ProfileErrorResponse {
   message?: string;
@@ -26,8 +27,8 @@ interface ProfileErrorResponse {
   template: `
   <div class="row between">
     <div>
-      <h2>My profile</h2>
-      <p class="muted">Manage your personal details, membership status, and password.</p>
+      <h2>{{ i18n.t('PROFILE_TITLE') }}</h2>
+      <p class="muted">{{ i18n.t('PROFILE_SUBTITLE') }}</p>
     </div>
     @if (profile(); as p) {
       <span class="badge b-{{ p.membership_status }}">{{ p.membership_status }}</span>
@@ -39,26 +40,26 @@ interface ProfileErrorResponse {
   } @else if (profile(); as p) {
     <div class="grid grid-4 mt">
       <div class="card">
-        <p>Member ID</p>
+        <p>{{ i18n.t('MEMBER_ID') }}</p>
         <h2 class="accent">{{ p.member_id }}</h2>
       </div>
       <div class="card">
-        <p>Membership valid until</p>
+        <p>{{ i18n.t('MEMBERSHIP_VALID_UNTIL') }}</p>
         <h3>
           @if (p.membership_end_date; as endDate) {
             {{ endDate | date: 'd MMM y' }}
           } @else {
-            No active plan
+            {{ i18n.t('NO_ACTIVE_PLAN') }}
           }
         </h3>
       </div>
       <div class="card">
-        <p>Wallet balance</p>
+        <p>{{ i18n.t('WALLET_BALANCE_LABEL') }}</p>
         <h3>{{ wallet()?.balance_kzt ?? 0 }} <small class="muted">KZT</small></h3>
       </div>
       <div class="card">
-        <p>Finished sessions</p>
-        <h3>{{ stats()?.total_sessions ?? 0 }} <small class="muted">({{ stats()?.total_hours ?? 0 }} h)</small></h3>
+        <p>{{ i18n.t('FINISHED_SESSIONS_LABEL') }}</p>
+        <h3>{{ stats()?.total_sessions ?? 0 }} <small class="muted">({{ stats()?.total_hours ?? 0 }} {{ i18n.t('STATS_HOUR_UNIT') }})</small></h3>
       </div>
     </div>
 
@@ -74,13 +75,13 @@ interface ProfileErrorResponse {
         </div>
 
         <form class="mt" (ngSubmit)="saveProfile()">
-          <label for="pf-name">Full name</label>
+          <label for="pf-name">{{ i18n.t('FULL_NAME') }}</label>
           <input id="pf-name" name="full_name" [(ngModel)]="form.full_name" required />
 
-          <label for="pf-phone">Phone</label>
+          <label for="pf-phone">{{ i18n.t('PHONE') }}</label>
           <input id="pf-phone" name="phone" [(ngModel)]="form.phone" required />
 
-          <label for="pf-email">Email</label>
+          <label for="pf-email">{{ i18n.t('EMAIL') }}</label>
           <input id="pf-email" name="email" type="email" [(ngModel)]="form.email" required />
 
           @if (profileError()) {
@@ -89,20 +90,20 @@ interface ProfileErrorResponse {
 
           <div class="row mt" style="justify-content: space-between;">
             <button class="btn btn-primary" [disabled]="savingProfile()">
-              {{ savingProfile() ? 'Saving…' : 'Save changes' }}
+              {{ savingProfile() ? i18n.t('SAVING_TEXT') : i18n.t('BTN_SAVE_CHANGES') }}
             </button>
-            <a class="btn" routerLink="/wallet">Manage wallet →</a>
+            <a class="btn" routerLink="/wallet">{{ i18n.t('MANAGE_WALLET_LINK') }}</a>
           </div>
         </form>
       </div>
 
       <!-- 2. Парольді ауыстыру -->
       <div class="card">
-        <h3>Change password</h3>
-        <p class="muted" style="font-size: .9rem;">Keep your account secure with a strong password.</p>
+        <h3>{{ i18n.t('CHANGE_PWD_TITLE') }}</h3>
+        <p class="muted" style="font-size: .9rem;">{{ i18n.t('CHANGE_PWD_SUBTITLE') }}</p>
 
         <form (ngSubmit)="updatePassword()">
-          <label for="old-pw">Current password</label>
+          <label for="old-pw">{{ i18n.t('OLD_PASSWORD') }}</label>
           <input
             id="old-pw"
             name="old_password"
@@ -111,7 +112,7 @@ interface ProfileErrorResponse {
             required
           />
 
-          <label for="new-pw">New password</label>
+          <label for="new-pw">{{ i18n.t('NEW_PASSWORD') }}</label>
           <div class="pwd-wrap">
             <input
               id="new-pw"
@@ -121,11 +122,11 @@ interface ProfileErrorResponse {
               required
             />
             <button type="button" class="btn btn-sm" (click)="showPwd.set(!showPwd())">
-              {{ showPwd() ? 'Hide' : 'Show' }}
+              {{ showPwd() ? i18n.t('BTN_HIDE') : i18n.t('BTN_SHOW') }}
             </button>
           </div>
 
-          <label for="conf-pw">Confirm new password</label>
+          <label for="conf-pw">{{ i18n.t('CONFIRM_NEW_PASSWORD') }}</label>
           <input
             id="conf-pw"
             name="confirm_password"
@@ -136,12 +137,12 @@ interface ProfileErrorResponse {
 
           <div class="pwd-rules mt-s">
             <ul>
-              <li [class.valid]="rules.minLength">{{ rules.minLength ? '✔' : '○' }} 8–64 characters</li>
-              <li [class.valid]="rules.hasUpper">{{ rules.hasUpper ? '✔' : '○' }} At least 1 uppercase letter (A–Z)</li>
-              <li [class.valid]="rules.hasLower">{{ rules.hasLower ? '✔' : '○' }} At least 1 lowercase letter (a–z)</li>
-              <li [class.valid]="rules.hasDigit">{{ rules.hasDigit ? '✔' : '○' }} At least 1 digit (0–9)</li>
-              <li [class.valid]="rules.hasSpecial">{{ rules.hasSpecial ? '✔' : '○' }} At least 1 special character (!&#64;#$%...)</li>
-              <li [class.valid]="rules.notPersonal">{{ rules.notPersonal ? '✔' : '○' }} Does not contain your email or name</li>
+              <li [class.valid]="rules.minLength">{{ rules.minLength ? '✔' : '○' }} {{ i18n.t('RULE_LENGTH') }}</li>
+              <li [class.valid]="rules.hasUpper">{{ rules.hasUpper ? '✔' : '○' }} {{ i18n.t('RULE_UPPER') }}</li>
+              <li [class.valid]="rules.hasLower">{{ rules.hasLower ? '✔' : '○' }} {{ i18n.t('RULE_LOWER') }}</li>
+              <li [class.valid]="rules.hasDigit">{{ rules.hasDigit ? '✔' : '○' }} {{ i18n.t('RULE_DIGIT') }}</li>
+              <li [class.valid]="rules.hasSpecial">{{ rules.hasSpecial ? '✔' : '○' }} {{ i18n.t('RULE_SPECIAL') }}</li>
+              <li [class.valid]="rules.notPersonal">{{ rules.notPersonal ? '✔' : '○' }} {{ i18n.t('RULE_PERSONAL') }}</li>
             </ul>
           </div>
 
@@ -150,7 +151,7 @@ interface ProfileErrorResponse {
           }
 
           <button class="btn btn-primary mt" style="width: 100%;" [disabled]="savingPwd() || !canChangePassword">
-            {{ savingPwd() ? 'Updating…' : 'Update password' }}
+            {{ savingPwd() ? i18n.t('UPDATING_PWD_TEXT') : i18n.t('BTN_UPDATE_PASSWORD') }}
           </button>
         </form>
       </div>
@@ -176,6 +177,7 @@ export class ProfileComponent implements OnInit {
   private api = inject(ApiService);
   private auth = inject(AuthService);
   private toast = inject(ToastService);
+  readonly i18n = inject(I18nService);
 
   profile = signal<Member | null>(null);
   wallet = signal<Wallet | null>(null);
@@ -235,13 +237,13 @@ export class ProfileComponent implements OnInit {
         this.profile.set(updated);
         this.auth.updateName(updated.full_name);
         this.savingProfile.set(false);
-        this.toast.show('Profile updated', 'success');
+        this.toast.show(this.i18n.t('TOAST_PROFILE_UPDATED'), 'success');
       },
       error: (e: HttpErrorResponse) => {
         this.savingProfile.set(false);
         const body = e.error as ProfileErrorResponse | null;
         this.profileError.set(
-          body?.message || body?.detail || body?.email?.[0] || 'Could not update profile.'
+          body?.message || body?.detail || body?.email?.[0] || this.i18n.t('ERR_UPDATE_PROFILE')
         );
       },
     });
@@ -250,7 +252,7 @@ export class ProfileComponent implements OnInit {
   updatePassword() {
     this.pwdError.set('');
     if (this.newPassword !== this.confirmPassword) {
-      this.pwdError.set('New passwords do not match.');
+      this.pwdError.set(this.i18n.t('ERR_PW_MATCH'));
       return;
     }
     this.savingPwd.set(true);
@@ -264,7 +266,7 @@ export class ProfileComponent implements OnInit {
         this.oldPassword = '';
         this.newPassword = '';
         this.confirmPassword = '';
-        this.toast.show('Password updated successfully', 'success');
+        this.toast.show(this.i18n.t('TOAST_PWD_UPDATED'), 'success');
       },
       error: (e: HttpErrorResponse) => {
         this.savingPwd.set(false);
@@ -274,7 +276,7 @@ export class ProfileComponent implements OnInit {
           body?.new_password?.[0] ||
           body?.message ||
           body?.detail ||
-          'Could not change password.';
+          this.i18n.t('ERR_CHANGE_PWD');
         this.pwdError.set(msg);
       },
     });

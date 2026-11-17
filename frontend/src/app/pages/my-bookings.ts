@@ -29,18 +29,18 @@ const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
   <div class="card mt-s streak-banner">
     <div class="row between" style="flex-wrap: wrap; gap: 8px;">
       <div>
-        <strong>🔥 Loyalty Streak: {{ completedCount() % 5 }} / 5 sessions</strong>
+        <strong>🔥 {{ i18n.t('STREAK_TITLE') }} {{ completedCount() % 5 }} / 5 {{ i18n.t('STREAK_SESSIONS') }}</strong>
         <p class="muted" style="margin: 2px 0 0; font-size: .85rem;">
-          Complete 5 paid sessions to receive an automatic <strong>10% cashback</strong> to your Wallet!
+          {{ i18n.t('STREAK_DESC_1') }} <strong>{{ i18n.t('STREAK_CASHBACK') }}</strong> {{ i18n.t('STREAK_DESC_2') }}
         </p>
       </div>
-      <span class="chip on">{{ 5 - (completedCount() % 5) }} left for bonus</span>
+      <span class="chip on">{{ 5 - (completedCount() % 5) }} {{ i18n.t('STREAK_LEFT') }}</span>
     </div>
   </div>
 
   <div class="row mt-s" style="margin-top: 20px;">
     @for (t of tabs; track t) {
-      <button class="chip" [class.on]="tab() === t" (click)="tab.set(t)">{{ t }} ({{ count(t) }})</button>
+      <button class="chip" [class.on]="tab() === t" (click)="tab.set(t)">{{ tabLabel(t) }} ({{ count(t) }})</button>
     }
   </div>
 
@@ -49,11 +49,11 @@ const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
       <div class="card" style="display: flex; flex-direction: column; gap: 12px;">
         <div class="row between" style="align-items: flex-start;">
           <div>
-            <h3>{{ b.trainer_name }} <span class="badge b-{{ b.status }}">{{ b.status }}</span></h3>
-            <p>{{ b.session_start | date: 'EEEE d MMMM, HH:mm' }} · {{ b.specialization }}</p>
+            <h3>{{ b.trainer_name }} <span class="badge b-{{ b.status }}">{{ statusLabel(b.status) }}</span></h3>
+            <p>{{ b.session_start | date: 'EEEE d MMMM, HH:mm' }} · {{ i18n.tSpec(b.specialization) }}</p>
             <p style="font-size:.85rem; color: #94a3b8;">
-              Booking ID: {{ b.booking_id }} · {{ b.amount_kzt }} KZT
-              <span class="badge b-{{ b.payment_status }}">{{ b.payment_status }}</span>
+              {{ i18n.t('BOOKING_ID') }}: {{ b.booking_id }} · {{ b.amount_kzt }} KZT
+              <span class="badge b-{{ b.payment_status }}">{{ payStatusLabel(b.payment_status) }}</span>
             </p>
           </div>
           @if (b.status === 'Confirmed') {
@@ -61,7 +61,7 @@ const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
               class="btn btn-danger"
               [disabled]="!b.can_cancel"
               (click)="openManageModal(b)"
-              [title]="b.can_cancel ? '' : 'Cancel or reschedule at least 2 hours before the session'"
+              [title]="b.can_cancel ? '' : i18n.t('CANCEL_TOOLTIP')"
             >
               {{ i18n.t('BTN_CANCEL') }}
             </button>
@@ -69,11 +69,11 @@ const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
         </div>
 
         @if (b.review; as r) {
-          <div class="my-review"><app-stars [value]="r.rating" /> <span class="muted">Your review</span>
+          <div class="my-review"><app-stars [value]="r.rating" /> <span class="muted">{{ i18n.t('YOUR_REVIEW') }}</span>
             @if (r.comment) { <p style="margin:4px 0 0">{{ r.comment }}</p> }</div>
         } @else if (b.can_review) {
-          <div class="row between my-review"><span>How was your session?</span>
-            <button class="btn btn-primary btn-sm" (click)="openReview(b)">★ Rate trainer</button></div>
+          <div class="row between my-review"><span>{{ i18n.t('HOW_WAS_SESSION') }}</span>
+            <button class="btn btn-primary btn-sm" (click)="openReview(b)">{{ i18n.t('RATE_TRAINER_BTN') }}</button></div>
         }
 
         @if (b.status === 'Confirmed') {
@@ -86,21 +86,21 @@ const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
               />
             </div>
             <div>
-              <p style="font-weight: 600; font-size: 0.95rem; margin-bottom: 4px;">Сеансқа кіру QR-коды</p>
-              <p style="font-size: 0.85rem; color: #94a3b8; line-height: 1.4;">Залдың турникетінде осы жеке кодты сканерлеңіз. Код тек осы тренировкаға ғана жарамды.</p>
+              <p style="font-weight: 600; font-size: 0.95rem; margin-bottom: 4px;">{{ i18n.t('QR_TITLE') }}</p>
+              <p style="font-size: 0.85rem; color: #94a3b8; line-height: 1.4;">{{ i18n.t('QR_DESC') }}</p>
             </div>
           </div>
         }
       </div>
-    } @empty { <div class="card muted">{{ loaded() ? 'Nothing here yet.' : 'Loading…' }}</div> }
+    } @empty { <div class="card muted">{{ loaded() ? i18n.t('NOTHING_HERE') : i18n.t('LOADING_TEXT') }}</div> }
   </div>
 
-  <!-- РОЛЛАН: Cancel vs Reschedule таңдау модалы -->
+  <!-- Cancel vs Reschedule таңдау модалы -->
   @if (managing(); as mb) {
     <div class="backdrop" (click)="managing.set(null)">
       <div class="card dialog" style="width: 480px;" (click)="$event.stopPropagation()">
         <div class="row between">
-          <h3 style="margin: 0;">Manage booking #{{ mb.booking_id }}</h3>
+          <h3 style="margin: 0;">{{ i18n.t('MANAGE_BOOKING_TITLE') }}{{ mb.booking_id }}</h3>
           <button class="btn btn-sm" (click)="managing.set(null)">✕</button>
         </div>
         <p class="muted" style="margin-top: 6px;">
@@ -108,36 +108,36 @@ const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
         </p>
 
         @if (modalStep() === 'choice') {
-          <p class="mt-s">Would you like to move this workout to another time, or cancel it completely?</p>
+          <p class="mt-s">{{ i18n.t('MANAGE_CHOICE_PROMPT') }}</p>
 
           <div class="choice-box mt-s" (click)="startReschedule(mb)">
-            <strong>🕒 Change time (Reschedule)</strong>
+            <strong>{{ i18n.t('RESCHEDULE_TITLE') }}</strong>
             <p class="muted" style="margin: 4px 0 0; font-size: .85rem;">
-              Pick another free slot with {{ mb.trainer_name }}. <b>No extra payment</b> — your existing payment moves to the new time.
+              {{ i18n.t('RESCHEDULE_DESC_1') }} {{ mb.trainer_name }}. <b>{{ i18n.t('RESCHEDULE_NO_EXTRA') }}</b> {{ i18n.t('RESCHEDULE_DESC_2') }}
             </p>
           </div>
 
           <div class="choice-box danger mt-s" (click)="modalStep.set('confirm_cancel')">
-            <strong>✕ Cancel booking completely</strong>
+            <strong>{{ i18n.t('CANCEL_CHOICE_TITLE') }}</strong>
             <p class="muted" style="margin: 4px 0 0; font-size: .85rem;">
-              Release your spot and process payment refund according to the 24-hour policy.
+              {{ i18n.t('CANCEL_CHOICE_DESC') }}
             </p>
           </div>
         }
 
         @if (modalStep() === 'reschedule') {
-          <h4 class="mt-s">1. Choose a new date</h4>
+          <h4 class="mt-s">{{ i18n.t('STEP_NEW_DATE') }}</h4>
           <div class="row" style="flex-wrap: wrap;">
-            @for (d of days; track d.value) {
+            @for (d of days(); track d.value) {
               <button class="chip" [class.on]="newDate() === d.value" (click)="selectRescheduleDate(mb, d.value)">
                 {{ d.label }}
               </button>
             }
           </div>
 
-          <h4 class="mt-s">2. Choose a new time</h4>
+          <h4 class="mt-s">{{ i18n.t('STEP_NEW_TIME') }}</h4>
           @if (loadingSlots()) {
-            <p class="muted">Loading available slots…</p>
+            <p class="muted">{{ i18n.t('LOADING_SLOTS') }}</p>
           } @else {
             <div class="row" style="flex-wrap: wrap;">
               @for (s of availableSlots(); track s.time) {
@@ -149,43 +149,43 @@ const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
                 >
                   {{ s.time }}
                 </button>
-              } @empty { <p class="muted">No slots on this date.</p> }
+              } @empty { <p class="muted">{{ i18n.t('NO_SLOTS') }}</p> }
             </div>
           }
 
           <div class="row mt" style="justify-content: space-between;">
-            <button class="btn" (click)="modalStep.set('choice')">← Back</button>
+            <button class="btn" (click)="modalStep.set('choice')">{{ i18n.t('BTN_BACK') }}</button>
             <button class="btn btn-primary" [disabled]="!newTime() || actionBusy()" (click)="confirmReschedule(mb)">
-              {{ actionBusy() ? 'Updating…' : 'Confirm new time' }}
+              {{ actionBusy() ? i18n.t('UPDATING_BUSY') : i18n.t('CONFIRM_NEW_TIME') }}
             </button>
           </div>
         }
 
         @if (modalStep() === 'confirm_cancel') {
           <div class="refund-box mt-s">
-            <h4 style="margin: 0 0 6px;">💳 What happens with your payment?</h4>
+            <h4 style="margin: 0 0 6px;">{{ i18n.t('PAYMENT_OUTCOME_TITLE') }}</h4>
             @if (mb.payment_method === 'Membership' || !mb.amount_kzt || +mb.amount_kzt === 0) {
               <p style="margin: 0; font-size: .9rem;">
-                This session was booked using your <b>Membership subscription</b>. Your session pass will simply be released with no charge.
+                {{ i18n.t('REFUND_MEMBERSHIP_DESC') }}
               </p>
             } @else {
               <p style="margin: 0 0 6px; font-size: .9rem;">
-                Paid amount: <b>{{ mb.amount_kzt }} KZT</b> ({{ mb.payment_method }})
+                {{ i18n.t('PAID_AMOUNT_LABEL') }} <b>{{ mb.amount_kzt }} KZT</b> ({{ mb.payment_method }})
               </p>
               <p style="margin: 0; font-size: .9rem;">
                 @if (isMoreThan24Hours(mb.session_start)) {
-                  ✅ <b>More than 24 hours left:</b> You will receive a <b>100% refund ({{ mb.amount_kzt }} KZT)</b> directly to your Wallet.
+                  {{ i18n.t('REFUND_OVER_24H') }} (<b>{{ mb.amount_kzt }} KZT</b>).
                 } @else {
-                  ⚠️ <b>Less than 24 hours left:</b> Late cancellation policy applies — you will receive a <b>50% refund ({{ +mb.amount_kzt * 0.5 }} KZT)</b> to your Wallet.
+                  {{ i18n.t('REFUND_UNDER_24H') }} (<b>{{ +mb.amount_kzt * 0.5 }} KZT</b>).
                 }
               </p>
             }
           </div>
 
           <div class="row mt" style="justify-content: space-between;">
-            <button class="btn" (click)="modalStep.set('choice')">← Back</button>
+            <button class="btn" (click)="modalStep.set('choice')">{{ i18n.t('BTN_BACK') }}</button>
             <button class="btn btn-danger" [disabled]="actionBusy()" (click)="confirmCancel(mb)">
-              {{ actionBusy() ? 'Cancelling…' : 'Confirm cancellation' }}
+              {{ actionBusy() ? i18n.t('CANCELLING_BUSY') : i18n.t('CONFIRM_CANCELLATION') }}
             </button>
           </div>
         }
@@ -197,14 +197,14 @@ const isoDate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
   @if (reviewing(); as rb) {
     <div class="backdrop" (click)="reviewing.set(null)">
       <div class="card dialog" (click)="$event.stopPropagation()">
-        <h3>Rate {{ rb.trainer_name }}</h3>
+        <h3>{{ i18n.t('RATE_TITLE') }} {{ rb.trainer_name }}</h3>
         <p>{{ rb.session_start | date: 'EEEE d MMMM, HH:mm' }}</p>
         <div style="text-align:center;margin:12px 0"><app-stars [value]="stars" [editable]="true" (picked)="stars = $event" /></div>
-        <label for="cm">Comment (optional)</label>
-        <textarea id="cm" rows="4" maxlength="1000" [(ngModel)]="comment" placeholder="What did you like? What could be better?"></textarea>
+        <label for="cm">{{ i18n.t('COMMENT_OPTIONAL') }}</label>
+        <textarea id="cm" rows="4" maxlength="1000" [(ngModel)]="comment" [placeholder]="i18n.t('COMMENT_PLACEHOLDER')"></textarea>
         <div class="row mt" style="justify-content:flex-end">
-          <button class="btn" (click)="reviewing.set(null)">Cancel</button>
-          <button class="btn btn-primary" [disabled]="!stars || sending()" (click)="sendReview(rb)">Send review</button>
+          <button class="btn" (click)="reviewing.set(null)">{{ i18n.t('BTN_CANCEL_SIMPLE') }}</button>
+          <button class="btn btn-primary" [disabled]="!stars || sending()" (click)="sendReview(rb)">{{ i18n.t('SEND_REVIEW_BTN') }}</button>
         </div>
       </div>
     </div>
@@ -244,12 +244,16 @@ export class MyBookingsComponent implements OnInit {
   actionBusy = signal(false);
   loadingSlots = signal(false);
   availableSlots = signal<Slot[]>([]);
-  days = Array.from({ length: 10 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    return { value: isoDate(d), label: d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) };
+  days = computed(() => {
+    const localeMap = { kk: 'kk-KZ', ru: 'ru-RU', en: 'en-GB' } as const;
+    const locale = localeMap[this.i18n.lang()];
+    return Array.from({ length: 10 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      return { value: isoDate(d), label: d.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' }) };
+    });
   });
-  newDate = signal(this.days[0].value);
+  newDate = signal(isoDate(new Date()));
   newTime = signal<string | null>(null);
 
   shown = computed(() => this.filter(this.tab()));
@@ -260,6 +264,28 @@ export class MyBookingsComponent implements OnInit {
   ngOnInit() { this.load(); }
 
   load() { this.api.myBookings().subscribe(b => { this.all.set(b); this.loaded.set(true); }); }
+
+  tabLabel(t: Tab): string {
+    const map: Record<Tab, string> = {
+      upcoming: 'TAB_UPCOMING',
+      past: 'TAB_PAST',
+      cancelled: 'TAB_CANCELLED',
+    };
+    return this.i18n.t(map[t]);
+  }
+
+  statusLabel(status: string): string {
+    const key = `STATUS_${status.toUpperCase()}`;
+    const translated = this.i18n.t(key);
+    return translated === key ? status : translated;
+  }
+
+  payStatusLabel(status: string | null | undefined): string {
+    if (!status) return '';
+    const key = `PAY_STATUS_${status.toUpperCase()}`;
+    const translated = this.i18n.t(key);
+    return translated === key ? status : translated;
+  }
 
   private filter(t: Tab) {
     const now = Date.now();
@@ -277,8 +303,8 @@ export class MyBookingsComponent implements OnInit {
   sendReview(b: Booking) {
     this.sending.set(true);
     this.api.reviewBooking(b.booking_id, this.stars, this.comment).subscribe({
-      next: () => { this.sending.set(false); this.reviewing.set(null); this.toast.show('Thank you for your review!', 'success'); this.load(); },
-      error: (e: HttpErrorResponse) => { this.sending.set(false); this.toast.show((e.error as ApiError)?.message ?? 'Could not send review', 'error'); }
+      next: () => { this.sending.set(false); this.reviewing.set(null); this.toast.show(this.i18n.t('TOAST_REVIEW_SENT'), 'success'); this.load(); },
+      error: (e: HttpErrorResponse) => { this.sending.set(false); this.toast.show((e.error as ApiError)?.message ?? this.i18n.t('ERR_REVIEW_SEND'), 'error'); }
     });
   }
 
@@ -290,7 +316,7 @@ export class MyBookingsComponent implements OnInit {
 
   startReschedule(b: Booking) {
     this.modalStep.set('reschedule');
-    this.selectRescheduleDate(b, this.days[0].value);
+    this.selectRescheduleDate(b, this.days()[0].value);
   }
 
   selectRescheduleDate(b: Booking, dateVal: string) {
@@ -304,7 +330,7 @@ export class MyBookingsComponent implements OnInit {
       },
       error: () => {
         this.loadingSlots.set(false);
-        this.toast.show('Could not load available slots', 'error');
+        this.toast.show(this.i18n.t('ERR_SLOTS'), 'error');
       }
     });
   }
@@ -320,12 +346,12 @@ export class MyBookingsComponent implements OnInit {
       next: () => {
         this.actionBusy.set(false);
         this.managing.set(null);
-        this.toast.show('Session time updated! No extra payment charged.', 'success');
+        this.toast.show(this.i18n.t('TOAST_RESCHEDULED'), 'success');
         this.load();
       },
       error: (e: HttpErrorResponse) => {
         this.actionBusy.set(false);
-        this.toast.show((e.error as ApiError)?.message ?? 'Could not reschedule session', 'error');
+        this.toast.show((e.error as ApiError)?.message ?? this.i18n.t('ERR_RESCHEDULE'), 'error');
       }
     });
   }
@@ -344,15 +370,15 @@ export class MyBookingsComponent implements OnInit {
         const refunded = res.refund_info?.refunded_kzt;
         const pct = res.refund_info?.refund_percent ?? 0;
         if (refunded && refunded > 0) {
-          this.toast.show(`Booking cancelled. ${refunded} KZT (${pct}%) refunded to your Wallet.`, 'success');
+          this.toast.show(`${this.i18n.t('TOAST_CANCELLED_REFUND')} ${refunded} KZT (${pct}%).`, 'success');
         } else {
-          this.toast.show('Booking cancelled.', 'success');
+          this.toast.show(this.i18n.t('TOAST_CANCELLED'), 'success');
         }
         this.load();
       },
       error: (e: HttpErrorResponse) => {
         this.actionBusy.set(false);
-        this.toast.show((e.error as ApiError)?.message ?? 'Could not cancel booking', 'error');
+        this.toast.show((e.error as ApiError)?.message ?? this.i18n.t('ERR_CANCEL'), 'error');
       }
     });
   }
