@@ -1,0 +1,8 @@
+.nav{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:24px;padding:14px 24px;background:rgba(11,18,32,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.brand{font:800 1.4rem var(--font-head);text-decoration:none} .brand span{color:var(--primary)}
+.links{display:flex;gap:6px;flex:1} .links a{padding:8px 14px;border-radius:10px;text-decoration:none;color:var(--muted);font-weight:500}
+.links a.active,.links a:hover{background:var(--surface-2);color:var(--text)} .user{display:flex;align-items:center;gap:12px;margin-left:auto}
+.toasts{position:fixed;right:20px;bottom:20px;display:grid;gap:10px;z-index:50}
+.toast{padding:12px 18px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.t-success{border-color:var(--ok)} .t-error{border-color:var(--danger)}
+@media (max-width:640px){.user .muted{display:none}.nav{gap:10px;padding:12px 14px}}

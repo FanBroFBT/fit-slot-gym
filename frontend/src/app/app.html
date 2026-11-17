@@ -1,0 +1,52 @@
+<header class="nav">
+  <a class="brand" [routerLink]="auth.user() ? auth.home() : '/login'">Fit<span>Slot</span></a>
+  @if (auth.user(); as u) {
+    <nav class="links">
+      @if (u.role === 'member') {
+        <a routerLink="/book" routerLinkActive="active">{{ i18n.t('NAV_BOOK') }}</a>
+        <a routerLink="/trainers" routerLinkActive="active">{{ i18n.t('NAV_TRAINERS') }}</a>
+        <a routerLink="/my-bookings" routerLinkActive="active">{{ i18n.t('NAV_MY_BOOKINGS') }}</a>
+        <a routerLink="/stats" routerLinkActive="active">{{ i18n.t('NAV_STATS') }}</a>
+        <a routerLink="/wallet" routerLinkActive="active">{{ i18n.t('NAV_WALLET') }}</a>
+        <a routerLink="/news" routerLinkActive="active">{{ i18n.t('NAV_NEWS') }}</a>
+        <a routerLink="/profile" routerLinkActive="active">{{ i18n.t('NAV_PROFILE') }}</a>
+      } @else {
+        <a routerLink="/admin" routerLinkActive="active">{{ i18n.t('NAV_DASHBOARD') }}</a>
+      }
+    </nav>
+  }
+
+  <div class="user" style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+    <select
+      aria-label="Language"
+      [value]="i18n.lang()"
+      (change)="changeLang($event)"
+      style="width: auto; padding: 5px 8px; margin: 0;"
+    >
+      <option value="kk">ҚАЗ</option>
+      <option value="ru">РУС</option>
+      <option value="en">ENG</option>
+    </select>
+
+    <button class="btn btn-sm" type="button" (click)="themeSvc.cycleTheme()">
+      @if (themeSvc.theme() === 'dark') { 🌙 Dark }
+      @else if (themeSvc.theme() === 'light') { ☀️ Light }
+      @else { ⚡ Neon }
+    </button>
+
+    @if (auth.user(); as u) {
+      @if (u.role === 'member') {
+        <a routerLink="/profile" class="muted" style="text-decoration: none;">{{ u.name }}</a>
+      } @else {
+        <span class="muted">{{ u.name }}</span>
+      }
+      <button class="btn btn-sm" (click)="auth.logout()">{{ i18n.t('LOG_OUT') }}</button>
+    }
+  </div>
+</header>
+<main class="container"><router-outlet /></main>
+<div class="toasts" aria-live="polite">
+  @for (t of toast.toasts(); track t.id) {
+    <div class="toast t-{{ t.type }}">{{ t.text }}</div>
+  }
+</div>
