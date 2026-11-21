@@ -1,19 +1,79 @@
-node_modules/
-dist/
-.angular/
-venv/
-__pycache__/
-*.pyc
-backend/gym.sqlite3
 
+# =========================
+# Python virtual environments
+# =========================
+.venv/
+venv/
+env/
+**/.venv/
+**/venv/
+**/env/
+
+# =========================
+# Python cache
+# =========================
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.python_libs/
+
+# =========================
+# Django database
+# =========================
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+
+# =========================
+# API keys and secrets
+# =========================
 .env
 .env.*
-!.env.example
 **/.env
-**/venv/
+**/.env.*
+
+# Allow safe environment templates
+!.env.example
+!**/.env.example
+
+# =========================
+# Angular / Node.js
+# =========================
+node_modules/
 **/node_modules/
+
+dist/
 **/dist/
-**/__pycache__/
+
+.angular/
 **/.angular/
-*.sqlite3
-.python_libs/
+
+coverage/
+**/coverage/
+
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# Build and temporary files
+# =========================
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# =========================
+# Operating system
+# =========================
+.DS_Store
+Thumbs.db
+Desktop.ini
