@@ -1,0 +1,32 @@
+<header class="nav">
+  <a class="brand" [routerLink]="auth.user() ? auth.home() : '/login'">Fit<span>Slot</span></a>
+  @if (auth.user(); as u) {
+    <nav class="links">
+      @if (u.role === 'member') {
+        <a routerLink="/book" routerLinkActive="active">{{i18n.t('Book')}}</a>
+        <a routerLink="/trainers" routerLinkActive="active">{{i18n.t('Trainers')}}</a>
+        <a routerLink="/my-bookings" routerLinkActive="active">{{i18n.t('My bookings')}}</a>
+        <a routerLink="/wallet" routerLinkActive="active">{{i18n.t('Wallet')}}</a>
+        <a routerLink="/stats" routerLinkActive="active">{{i18n.t('Stats')}}</a>
+        <a routerLink="/profile" routerLinkActive="active">{{i18n.t('Profile')}}</a>
+        <a routerLink="/news" routerLinkActive="active">{{i18n.t('News')}}</a>
+      } @else {
+        <a routerLink="/admin" routerLinkActive="active">{{i18n.t('Dashboard')}}</a>
+      }
+    </nav>
+    <div class="user">
+      @if (u.role === 'member') { <app-notification-bell /> }
+      <select class="nav-select" [value]="i18n.lang()" (change)="changeLang($event)" aria-label="Language">
+        <option value="kk">ҚАЗ</option><option value="ru">РУС</option><option value="en">ENG</option>
+      </select>
+      <button class="btn btn-sm" type="button" (click)="themeSvc.cycle()" aria-label="Change theme">◐ {{themeSvc.current()}}</button>
+      <span class="muted user-name">{{u.name}}</span>
+      <button class="btn btn-sm" type="button" (click)="auth.logout()">{{i18n.t('Log out')}}</button>
+    </div>
+  }
+</header>
+<main class="container"><router-outlet /></main>
+@if (auth.user()?.role === 'member') { <app-ai-coach-widget /> }
+<div class="toasts" aria-live="polite">
+  @for (t of toast.toasts(); track t.id) { <div class="toast t-{{t.type}}">{{t.text}}</div> }
+</div>
