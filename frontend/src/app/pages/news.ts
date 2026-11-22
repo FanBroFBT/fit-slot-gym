@@ -8,8 +8,8 @@ import { CommonModule } from '@angular/common';
   template: `
     <div class="container" style="padding: 30px 0; max-width: 1200px; margin: 0 auto;">
       <div style="margin-bottom: 32px; text-align: center;">
-        <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">📰 Club News & Special Offers</h2>
-        <p style="color: #94a3b8; font-size: 1.05rem;">Stay updated with our latest gym equipment, professional masterclasses, and seasonal discounts.</p>
+        <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; background: linear-gradient(135deg, var(--primary), var(--indigo)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">📰 Club News & Special Offers</h2>
+        <p style="color: var(--muted); font-size: 1.05rem;">Stay updated with our latest gym equipment, professional masterclasses, and seasonal discounts.</p>
       </div>
       
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 28px;">
@@ -31,8 +31,8 @@ import { CommonModule } from '@angular/common';
   `,
   styles: `
     .news-card {
-      background-color: var(--card-bg, #1e293b);
-      border: 1px solid var(--border-color, #334155);
+      background-color: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 16px;
       overflow: hidden;
       display: flex;
@@ -43,7 +43,7 @@ import { CommonModule } from '@angular/common';
     .news-card:hover {
       transform: translateY(-6px);
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      border-color: #38bdf8;
+      border-color: var(--primary);
     }
     .image-container {
       position: relative;
@@ -64,14 +64,14 @@ import { CommonModule } from '@angular/common';
       position: absolute;
       top: 12px;
       right: 12px;
-      background: rgba(15, 23, 42, 0.85);
+      background: var(--surface-2);
       backdrop-filter: blur(4px);
-      color: #38bdf8;
+      color: var(--primary);
       font-size: 0.75rem;
       font-weight: 700;
       padding: 5px 12px;
       border-radius: 20px;
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      border: 1px solid var(--border);
     }
     .card-content {
       padding: 22px;
@@ -81,7 +81,7 @@ import { CommonModule } from '@angular/common';
     }
     .news-date {
       font-size: 0.8rem;
-      color: #38bdf8;
+      color: var(--primary);
       margin-bottom: 8px;
       font-weight: 600;
     }
@@ -89,12 +89,12 @@ import { CommonModule } from '@angular/common';
       font-size: 1.15rem;
       font-weight: 700;
       margin-bottom: 10px;
-      color: var(--text-color, #f8fafc);
+      color: var(--text);
       line-height: 1.4;
     }
     .news-desc {
       font-size: 0.92rem;
-      color: #94a3b8;
+      color: var(--muted);
       line-height: 1.6;
       flex-grow: 1;
     }

@@ -1,4 +1,3 @@
-
 from datetime import date, datetime, timedelta
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -312,7 +311,7 @@ class WalletTopUpView(APIView):
     permission_classes = [IsMemberRole]
     def post(self, request):
         try:
-            services.top_up(request.user.profile.member, request.data.get("amount"),
+            services.top_up(request.user.profile.member, request.data.get('amount'),
                             str(request.data.get('payment_method', 'Card'))[:20])
         except services.BookingError as e:
             return Response(e.payload(), status=e.http_status)

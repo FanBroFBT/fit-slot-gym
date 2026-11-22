@@ -38,7 +38,7 @@ type Tab = 'upcoming' | 'past' | 'cancelled';
             <h3>{{ b.trainer_name }} <span class="badge b-{{ b.status }}">{{ b.status }}</span></h3>
             <p>{{ b.session_start | date: 'EEEE d MMMM, HH:mm' }} · {{ b.specialization }}</p>
             <p><span class="badge b-Completed">{{ i18n.t(b.training_type === 'group' ? 'Group' : 'Individual') }}</span></p>
-            <p style="font-size:.85rem; color: #94a3b8;">Booking ID: {{ b.booking_id }} · {{ b.amount_kzt }} KZT <span class="badge b-{{ b.payment_status }}">{{ b.payment_status }}</span></p>
+            <p style="font-size:.85rem; color: var(--muted);">Booking ID: {{ b.booking_id }} · {{ b.amount_kzt }} KZT <span class="badge b-{{ b.payment_status }}">{{ b.payment_status }}</span></p>
           </div>
           @if (b.status === 'Confirmed') {
             <button class="btn" [disabled]="!b.can_cancel" (click)="editing.set(editing() === b.booking_id ? null : b.booking_id)">{{i18n.t('Reschedule')}}</button>
@@ -56,7 +56,7 @@ type Tab = 'upcoming' | 'past' | 'cancelled';
         }
         <!-- Егер бронь расталған (Confirmed) болса, сол сеансқа арналған жеке QR-код шығады -->
         @if (b.status === 'Confirmed') {
-          <div style="background: rgba(15, 23, 42, 0.4); padding: 12px; border-radius: 8px; display: flex; align-items: center; gap: 16px; border: 1px dashed var(--border-color);">
+          <div style="background: var(--surface-2); padding: 12px; border-radius: 8px; display: flex; align-items: center; gap: 16px; border: 1px dashed var(--border);">
             <div style="background: white; padding: 6px; border-radius: 6px;">
               <img 
                 [src]="'https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=SessionPass-' + b.booking_id" 
@@ -66,7 +66,7 @@ type Tab = 'upcoming' | 'past' | 'cancelled';
             </div>
             <div>
               <p style="font-weight: 600; font-size: 0.95rem; margin-bottom: 4px;">Сеансқа кіру QR-коды</p>
-              <p style="font-size: 0.85rem; color: #94a3b8; line-height: 1.4;">Залдың турникетінде осы жеке кодты сканерлеңіз. Код тек осы тренировкаға ғана жарамды.</p>
+              <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.4;">Залдың турникетінде осы жеке кодты сканерлеңіз. Код тек осы тренировкаға ғана жарамды.</p>
             </div>
           </div>
         }

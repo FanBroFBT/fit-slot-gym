@@ -1,5 +1,5 @@
 <header class="nav">
-  <a class="brand" [routerLink]="auth.user() ? auth.home() : '/login'">Fit<span>Slot</span></a>
+  <a class="brand" [routerLink]="auth.user() ? auth.home() : '/login'"><span class="brand-mark" aria-hidden="true">F</span>Fit<span>Slot</span></a>
   @if (auth.user(); as u) {
     <nav class="links">
       @if (u.role === 'member') {
@@ -19,11 +19,15 @@
       <select class="nav-select" [value]="i18n.lang()" (change)="changeLang($event)" aria-label="Language">
         <option value="kk">ҚАЗ</option><option value="ru">РУС</option><option value="en">ENG</option>
       </select>
-      <button class="btn btn-sm" type="button" (click)="themeSvc.cycle()" aria-label="Change theme">◐ {{themeSvc.current()}}</button>
+      
       <span class="muted user-name">{{u.name}}</span>
       <button class="btn btn-sm" type="button" (click)="auth.logout()">{{i18n.t('Log out')}}</button>
     </div>
   }
+  <button class="btn btn-sm theme-cycle" type="button" (click)="themeSvc.cycle()"
+    [attr.aria-label]="'Change theme. Current: ' + themeSvc.current()" title="Switch dark / light / neon">
+    {{ themeSvc.current() === 'dark' ? '☾' : themeSvc.current() === 'light' ? '☀' : '✦' }} {{ themeSvc.current() }}
+  </button>
 </header>
 <main class="container"><router-outlet /></main>
 @if (auth.user()?.role === 'member') { <app-ai-coach-widget /> }

@@ -8,6 +8,7 @@ import { ApiError, Booking, Slot, Trainer, TrainingType } from '../core/models';
 import { I18nService } from '../core/i18n.service';
 import { combineLatest } from 'rxjs';
 import { ToastService } from '../core/toast.service';
+import { ThemeService } from '../core/theme.service';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -16,7 +17,22 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
   selector: 'app-book',
   imports: [FormsModule, DatePipe, RouterLink],
   template: `
-  <h2>{{ i18n.t('Book a training session') }}</h2>
+  <section class="brand-hero" aria-label="FitSlot training welcome">
+    <div>
+      <span class="eyebrow">✦ FITSLOT TRAINING CLUB</span>
+      <h1>{{i18n.t('Book a training session')}}<span class="accent">.</span></h1>
+      <p>Find your coach. Choose a format. Lock in your training time — all in one place.</p>
+      <div class="brand-hero-actions">
+        <span class="brand-mini-tag">✓ Real available slots</span>
+        <span class="brand-mini-tag">✓ Individual & group</span>
+        <span class="brand-mini-tag">✓ Smart AI coaching</span>
+      </div>
+    </div>
+    <div class="brand-hero-media">
+      <img [src]="themeSvc.current() === 'neon' ? '/mascot/fitslot-neon.webp' : '/mascot/fitslot-default.webp'"
+           alt="FitSlot tiger mascot ready for training" width="255" height="341" />
+    </div>
+  </section>
   <div class="card mt-s">
     <b>{{i18n.t('Training format')}}</b>
     <div class="row mt-s">
@@ -120,7 +136,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
         <p style="margin: 8px 0;"><b>Жұмыс уақыты:</b> {{ st.working_hours }}</p>
         <p style="margin: 8px 0;"><b>Байланыс телефоны:</b> {{ st.phone }}</p>
         
-        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0;">
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 15px 0;">
         
         <p style="font-size: 0.95rem; color: var(--muted); line-height: 1.5;">
           <b>{{i18n.t('Experience')}}:</b> {{st.experience_years}} {{i18n.t('years')}} · {{st.bio}}
@@ -176,7 +192,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
     .badge-speciality {
       font-size: 0.75rem;
       font-weight: 700;
-      color: #fbbf24;
+      color: var(--primary);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 6px;
@@ -195,7 +211,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
     .btn-book {
       margin: 0 20px 10px 20px;
       background-color: var(--primary);
-      color: #0f172a;
+      color: var(--primary-ink);
       border: none;
       border-radius: 12px;
       padding: 12px;
@@ -243,6 +259,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
 export class BookComponent implements OnInit {
   private api = inject(ApiService);
   private toast = inject(ToastService);
+  themeSvc = inject(ThemeService);
   private route = inject(ActivatedRoute);
   i18n = inject(I18nService);
   trainingType = signal<TrainingType>('individual');
