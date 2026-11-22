@@ -34,3 +34,11 @@ coverage/
 *.tmp
 .DS_Store
 Thumbs.db
+
+# Extra guides & reports (keep only README.md on GitHub)
+/AI_COACH_FIX_KK.md
+/GROQ_FREE_SETUP_KK.md
+/README.txt
+/README_FITSLOT_2_0_KK.md
+/UPDATE_GUIDE_KK.md
+/WEEK13_REPORT.md
