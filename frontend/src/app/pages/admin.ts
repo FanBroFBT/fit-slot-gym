@@ -7,7 +7,7 @@ import { ApiError, Booking, Member, MembershipStatus, Summary, Trainer } from '.
 import { ToastService } from '../core/toast.service';
 import { I18nService } from '../core/i18n.service';
 
-type Tab = 'bookings' | 'members' | 'busiest';
+type Tab = 'bookings' | 'members' | 'busiest' | 'trainers';
 
 @Component({
   selector: 'app-admin',
@@ -68,6 +68,29 @@ type Tab = 'bookings' | 'members' | 'busiest';
           <div class="bar"><div class="fill" [style.width.%]="b.total_bookings / max() * 100"></div></div><b>{{ b.total_bookings }}</b></div>
       } @empty { <p>No confirmed bookings this month.</p> }
     </div>
+  }
+
+  @if (tab() === 'trainers') {
+    <div class="card mt">
+      <h3>Create trainer account</h3>
+      <p class="muted" style="font-size:.85rem;">Issue a login for an existing trainer record.</p>
+      <form class="mt-s" (ngSubmit)="createAccount()">
+        <label>Trainer</label>
+        <select [(ngModel)]="newAccountTrainerId" name="newAccountTrainerId" required>
+          <option value="" disabled>Select trainer…</option>
+          @for (t of trainers(); track t.trainer_id) {
+            <option [value]="t.trainer_id">{{ t.trainer_id }} — {{ t.full_name }}</option>
+          }
+        </select>
+        <label>Email</label>
+        <input [(ngModel)]="newAccountEmail" name="newAccountEmail" type="email" required />
+        <label>Password</label>
+        <input [(ngModel)]="newAccountPassword" name="newAccountPassword" type="password" required minlength="8" />
+        <button class="btn btn-primary mt" type="submit" [disabled]="creatingAccount()">
+          {{ creatingAccount() ? 'Creating…' : 'Create trainer account' }}
+        </button>
+      </form>
+    </div>
   }`,
   styles: `.bar{flex:1;height:14px;background:var(--surface-2);border-radius:99px;overflow:hidden;min-width:120px}
   .fill{height:100%;background:linear-gradient(90deg,var(--indigo),var(--primary));border-radius:99px}`
@@ -76,8 +99,8 @@ export class AdminComponent implements OnInit {
   private api = inject(ApiService);
   i18n = inject(I18nService);
   private toast = inject(ToastService);
-  tabs: Tab[] = ['bookings', 'members', 'busiest'];
-  labels: Record<Tab, string> = { bookings: 'Bookings', members: 'Members', busiest: 'Busiest trainers' };
+  tabs: Tab[] = ['bookings', 'members', 'busiest', 'trainers'];
+  labels: Record<Tab, string> = { bookings: 'Bookings', members: 'Members', busiest: 'Busiest trainers', trainers: 'Trainer accounts' };
   tab = signal<Tab>('bookings');
   summary = signal<Summary | null>(null);
   bookings = signal<Booking[]>([]);
@@ -85,6 +108,9 @@ export class AdminComponent implements OnInit {
   trainers = signal<Trainer[]>([]);
   fTrainer = ''; fStatus = '';
   max = computed(() => Math.max(1, ...(this.summary()?.busiest_trainers.map(b => b.total_bookings) ?? [1])));
+
+  newAccountTrainerId = ''; newAccountEmail = ''; newAccountPassword = '';
+  creatingAccount = signal(false);
 
   ngOnInit() {
     this.api.adminSummary().subscribe(s => this.summary.set(s));
@@ -105,6 +131,22 @@ export class AdminComponent implements OnInit {
         this.api.adminSummary().subscribe(s => this.summary.set(s));
       },
       error: (e: HttpErrorResponse) => this.toast.show((e.error as ApiError)?.message ?? 'Could not update', 'error')
+    });
+  }
+
+  createAccount() {
+    if (!this.newAccountTrainerId || !this.newAccountEmail || !this.newAccountPassword) return;
+    this.creatingAccount.set(true);
+    this.api.createTrainerAccount(this.newAccountTrainerId, this.newAccountEmail, this.newAccountPassword).subscribe({
+      next: () => {
+        this.creatingAccount.set(false);
+        this.toast.show('Trainer account created', 'success');
+        this.newAccountTrainerId = ''; this.newAccountEmail = ''; this.newAccountPassword = '';
+      },
+      error: (e: HttpErrorResponse) => {
+        this.creatingAccount.set(false);
+        this.toast.show((e.error as ApiError)?.message ?? 'Could not create account', 'error');
+      }
     });
   }
 }

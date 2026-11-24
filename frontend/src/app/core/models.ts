@@ -1,4 +1,4 @@
-export type Role = 'member' | 'admin';
+export type Role = 'member' | 'admin' | 'trainer';
 export type TrainingType = 'individual' | 'group';
 export type BookingStatus = 'Confirmed' | 'Cancelled' | 'Completed';
 export type MembershipStatus = 'Active' | 'Frozen' | 'Expired';
@@ -59,3 +59,5 @@ export interface MyStats {
   by_month: { month: string; sessions: number }[];
   loyalty_progress: number; loyalty_remaining: number;
 }
+export interface AuthInfo { token: string; role: Role; name: string; member_id: string | null; trainer_id: string | null; }
+export interface Certificate { id: number; title: string; issuer: string; year: number; credential_id: string; file?: string | null; }

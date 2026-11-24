@@ -117,10 +117,11 @@ class Payment(models.Model):
 
 
 class Profile(models.Model):
-    ROLES = [('member', 'member'), ('admin', 'admin')]
+    ROLES = [('member', 'member'), ('trainer', 'trainer'), ('admin', 'admin')]
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=10, choices=ROLES, default='member')
     member = models.OneToOneField(Member, null=True, blank=True, on_delete=models.PROTECT)
+    trainer = models.OneToOneField(Trainer, null=True, blank=True, on_delete=models.PROTECT, related_name='profile')
 
 
 class WalletTransaction(models.Model):
@@ -159,3 +160,14 @@ class Notification(models.Model):
     class Meta:
         ordering = ['-created_at', '-id']
         constraints = [models.UniqueConstraint(fields=['member', 'booking', 'notif_type'], condition=Q(notif_type='reminder'), name='uq_booking_reminder')]
+
+class TrainerCertificate(models.Model):
+    trainer = models.ForeignKey(Trainer, on_delete=models.CASCADE, related_name='certificates')
+    title = models.CharField(max_length=150)
+    issuer = models.CharField(max_length=150)
+    year = models.PositiveSmallIntegerField()
+    credential_id = models.CharField(max_length=100, blank=True)
+    file = models.FileField(upload_to='certificates/', blank=True, null=True)
+    class Meta:
+        ordering = ['-year', 'title']
+

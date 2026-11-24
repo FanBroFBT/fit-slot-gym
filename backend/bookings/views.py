@@ -17,14 +17,22 @@ from . import services, ai_coach
 from .models import Booking, Member, Notification, Payment, Profile, Review, Trainer
 from .permissions import IsAdminRole, IsMemberRole, role_of
 from .serializers import BookingSerializer, MemberSerializer, NotificationSerializer, ReviewSerializer, TrainerSerializer, TransactionSerializer
-
+from .models import Booking, Member, Notification, Payment, Profile, Review, Trainer, TrainerCertificate
+from .permissions import IsAdminRole, IsMemberRole, IsTrainerRole, role_of
+from .serializers import (BookingSerializer, CertificateSerializer, MemberSerializer, NotificationSerializer, ReviewSerializer, TrainerSerializer, TrainerSelfUpdateSerializer, TransactionSerializer)
 
 def auth_payload(user):
     token, _ = Token.objects.get_or_create(user=user)
     profile = user.profile
-    name = profile.member.full_name if profile.member else "Administrator"
+    if profile.member:
+        name = profile.member.full_name
+    elif profile.trainer:
+        name = profile.trainer.full_name
+    else:
+        name = "Administrator"
     return {"token": token.key, "role": profile.role, "name": name,
-            "member_id": profile.member_id}
+            "member_id": profile.member_id,
+            "trainer_id": profile.trainer_id if profile.trainer else None}
 
 
 def error(code, message, http_status, **extra):
@@ -37,7 +45,8 @@ class LoginView(APIView):
     throttle_classes = [ScopedRateThrottle]
 
     def post(self, request):
-        user = authenticate(username=request.data.get("email", ""), password=request.data.get("password", ""))
+        email = str(request.data.get("email", "")).strip().lower()
+        user = authenticate(username=email, password=request.data.get("password", ""))
         if not user or not hasattr(user, "profile"):
             return error("invalid_credentials", "Wrong email or password.", 401)
         return Response(auth_payload(user))
@@ -376,3 +385,93 @@ class ChangePasswordView(APIView):
         request.user.set_password(new)
         request.user.save(update_fields=['password'])
         return Response({'message': 'Password updated successfully.'})
+
+class AdminCreateTrainerAccountView(APIView):
+    """Admin issues a login for an existing Trainer record."""
+    permission_classes = [IsAdminRole]
+
+    def post(self, request, trainer_id):
+        trainer = get_object_or_404(Trainer, pk=trainer_id)
+        if hasattr(trainer, 'profile'):
+            return error('already_has_account', 'This trainer already has a login.', 409)
+        email = str(request.data.get('email', '')).strip().lower()
+        password = str(request.data.get('password', ''))
+        if '@' not in email:
+            return error('invalid_data', 'Valid email is required.', 422)
+        if User.objects.filter(username=email).exists():
+            return error('email_taken', 'This email is already registered.', 409)
+        try:
+            validate_password(password, user=User(username=email, email=email))
+        except DjangoValidationError as exc:
+            return error('weak_password', exc.messages[0], 422)
+        user = User.objects.create_user(username=email, email=email, password=password)
+        Profile.objects.create(user=user, role='trainer', trainer=trainer)
+        return Response({'message': 'Trainer account created.'}, status=201)
+
+
+class TrainerMeView(APIView):
+    permission_classes = [IsTrainerRole]
+
+    def get(self, request):
+        return Response(TrainerSerializer(request.user.profile.trainer).data)
+
+    def patch(self, request):
+        trainer = request.user.profile.trainer
+        serializer = TrainerSelfUpdateSerializer(trainer, data=request.data, partial=True)
+        if not serializer.is_valid():
+            return error('invalid_data', str(serializer.errors), 422)
+        serializer.save()
+        return Response(TrainerSerializer(trainer).data)
+
+
+class TrainerCertificatesView(APIView):
+    permission_classes = [IsTrainerRole]
+
+    def get(self, request):
+        trainer = request.user.profile.trainer
+        return Response(CertificateSerializer(trainer.certificates.all(), many=True).data)
+
+    def post(self, request):
+        trainer = request.user.profile.trainer
+        serializer = CertificateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return error('invalid_data', str(serializer.errors), 422)
+        serializer.save(trainer=trainer)
+        return Response(CertificateSerializer(trainer.certificates.all(), many=True).data, status=201)
+
+
+class TrainerCertificateDeleteView(APIView):
+    permission_classes = [IsTrainerRole]
+
+    def delete(self, request, cert_id):
+        trainer = request.user.profile.trainer
+        cert = get_object_or_404(TrainerCertificate, pk=cert_id, trainer=trainer)
+        cert.delete()
+        return Response(status=204)
+
+
+class TrainerMyBookingsView(APIView):
+    permission_classes = [IsTrainerRole]
+
+    def get(self, request):
+        qs = (Booking.objects.filter(trainer=request.user.profile.trainer)
+              .select_related('trainer', 'member', 'payment').order_by('-session_start'))
+        return Response(BookingSerializer(qs, many=True).data)
+
+from rest_framework.parsers import MultiPartParser, FormParser
+
+class TrainerCertificatesView(APIView):
+    permission_classes = [IsTrainerRole]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get(self, request):
+        trainer = request.user.profile.trainer
+        return Response(CertificateSerializer(trainer.certificates.all(), many=True, context={'request': request}).data)
+
+    def post(self, request):
+        trainer = request.user.profile.trainer
+        serializer = CertificateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return error('invalid_data', str(serializer.errors), 422)
+        serializer.save(trainer=trainer)
+        return Response(CertificateSerializer(trainer.certificates.all(), many=True, context={'request': request}).data, status=201)

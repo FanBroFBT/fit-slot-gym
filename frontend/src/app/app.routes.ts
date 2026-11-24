@@ -12,8 +12,8 @@ export const routes: Routes = [
   { path: 'book', canActivate: [roleGuard('member')], loadComponent: () => import('./pages/book').then(m => m.BookComponent) },
   { path: 'my-bookings', canActivate: [roleGuard('member')], loadComponent: () => import('./pages/my-bookings').then(m => m.MyBookingsComponent) },
   { path: 'admin', canActivate: [roleGuard('admin')], loadComponent: () => import('./pages/admin').then(m => m.AdminComponent) },
-  
-  // Жаңадан қосылған News беті (жүйеге кірген мүшелер немесе кез келген авторизацияланған қолданушы үшін)
+  { path: 'trainer', canActivate: [roleGuard('trainer')], loadComponent: () => import('./pages/trainer-dashboard').then(m => m.TrainerDashboardComponent) },
+
   { path: 'news', canActivate: [authGuard], loadComponent: () => import('./pages/news').then(m => m.NewsComponent) },
 
   { path: '**', canActivate: [authGuard], loadComponent: () => import('./pages/not-found').then(m => m.NotFoundComponent) },

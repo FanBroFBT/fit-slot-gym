@@ -14,3 +14,7 @@ class IsAdminRole(BasePermission):
 class IsMemberRole(BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated and role_of(request.user) == "member")
+
+class IsTrainerRole(BasePermission):
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated and role_of(request.user) == "trainer")

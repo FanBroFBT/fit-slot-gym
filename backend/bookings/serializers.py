@@ -80,3 +80,13 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = WalletTransaction
         fields = ['id', 'kind', 'amount_kzt', 'description', 'balance_after', 'created_at']
+
+class TrainerSelfUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Trainer
+        fields = ['working_hours', 'phone', 'bio', 'experience_years', 'photo']
+
+class CertificateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TrainerCertificate
+        fields = ['id', 'title', 'issuer', 'year', 'credential_id', 'file']

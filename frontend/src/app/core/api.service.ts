@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
-  AIReply, AuthInfo, Booking, CreateBookingBody, Member, MembershipStatus,
+  AIReply, AuthInfo, Booking, Certificate, CreateBookingBody, Member, MembershipStatus,
   MyStats, NotificationsResponse, SlotsResponse, Summary, Trainer,
   TrainerReviews, TrainingType, Wallet, BusiestTrainer
 } from './models';
@@ -53,4 +53,24 @@ export class ApiService {
   }
   adminSummary(): Observable<Summary> { return this.http.get<Summary>(`${this.base}/admin/summary/`); }
   busiest(year: number, month: number): Observable<BusiestTrainer[]> { return this.http.get<BusiestTrainer[]>(`${this.base}/admin/busiest-trainers/`, { params: { year, month } }); }
+  myTrainerProfile(): Observable<Trainer> { return this.http.get<Trainer>(`${this.base}/trainer/me/`); }
+  updateTrainerProfile(body: Partial<{working_hours:string;phone:string;bio:string;experience_years:number;photo:string}>): Observable<Trainer> {
+    return this.http.patch<Trainer>(`${this.base}/trainer/me/`, body);
+  }
+  trainerCertificates(): Observable<Certificate[]> { return this.http.get<Certificate[]>(`${this.base}/trainer/certificates/`); }
+    addCertificate(body: {title:string;issuer:string;year:number;credential_id:string}, file?: File): Observable<Certificate[]> {
+    const form = new FormData();
+    form.append('title', body.title);
+    form.append('issuer', body.issuer);
+    form.append('year', String(body.year));
+    form.append('credential_id', body.credential_id);
+    if (file) form.append('file', file);
+    return this.http.post<Certificate[]>(`${this.base}/trainer/certificates/`, form);
+  }
+  deleteCertificate(id: number): Observable<void> { return this.http.delete<void>(`${this.base}/trainer/certificates/${id}/`); }
+  trainerMyBookings(): Observable<Booking[]> { return this.http.get<Booking[]>(`${this.base}/trainer/bookings/my/`); }
+  createTrainerAccount(trainerId: string, email: string, password: string): Observable<{message: string}> {
+    return this.http.post<{message: string}>(`${this.base}/admin/trainers/${trainerId}/create-account/`, { email, password });
+  }
+  
 }

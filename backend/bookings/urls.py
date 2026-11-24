@@ -26,4 +26,9 @@ urlpatterns = [
     path('admin/members/<str:member_id>/status/', v.AdminMemberStatusView.as_view()),
     path('admin/busiest-trainers/', v.AdminBusiestView.as_view()),
     path('admin/summary/', v.AdminSummaryView.as_view()),
+    path('trainer/me/', v.TrainerMeView.as_view()),
+    path('trainer/certificates/', v.TrainerCertificatesView.as_view()),
+    path('trainer/certificates/<int:cert_id>/', v.TrainerCertificateDeleteView.as_view()),
+    path('trainer/bookings/my/', v.TrainerMyBookingsView.as_view()),
+    path('admin/trainers/<str:trainer_id>/create-account/', v.AdminCreateTrainerAccountView.as_view()),
 ]

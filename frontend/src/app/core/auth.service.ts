@@ -32,5 +32,9 @@ export class AuthService {
     this.user.set(null);
     this.router.navigate(['/login']);
   }
-  home(): string { return this.role() === 'admin' ? '/admin' : '/home'; }
+  home(): string {
+  if (this.role() === 'admin') return '/admin';
+  if (this.role() === 'trainer') return '/trainer';
+  return '/home';
+}
 }
