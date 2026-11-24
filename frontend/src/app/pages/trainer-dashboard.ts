@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/api.service';
 import { I18nService } from '../core/i18n.service';
@@ -11,6 +11,15 @@ import { ToastService } from '../core/toast.service';
   imports: [FormsModule],
   template: `
   <h2>{{ i18n.t('My trainer profile') }}</h2>
+
+  @if (profile(); as p) {
+    <div class="grid grid-4 mt">
+      <div class="card"><p>{{ i18n.t('Average rating') }}</p><h1>{{ p.avg_rating ?? '—' }}</h1></div>
+      <div class="card"><p>{{ i18n.t('Reviews') }}</p><h1>{{ p.reviews_count }}</h1></div>
+      <div class="card"><p>{{ i18n.t('Total bookings') }}</p><h1>{{ bookings().length }}</h1></div>
+      <div class="card"><p>{{ i18n.t('Upcoming') }}</p><h1>{{ upcomingCount() }}</h1></div>
+    </div>
+  }
 
   <div class="grid grid-3 mt">
     <form class="card profile-form" (ngSubmit)="save()">
@@ -72,6 +81,19 @@ import { ToastService } from '../core/toast.service';
       </div>
     </div>
   </div>
+
+  <div class="card mt" style="max-width: 420px;">
+    <h3>{{ i18n.t('Change password') }}</h3>
+    <form (ngSubmit)="changePassword()">
+      <label>{{ i18n.t('Old password') }}</label>
+      <input [(ngModel)]="oldPassword" name="old" type="password" required />
+      <label>{{ i18n.t('New password') }}</label>
+      <input [(ngModel)]="newPassword" name="new" type="password" required minlength="8" maxlength="64" />
+      <label>{{ i18n.t('Confirm password') }}</label>
+      <input [(ngModel)]="confirm" name="confirm" type="password" required />
+      <button class="btn btn-primary mt" type="submit" [disabled]="pwBusy()">{{ i18n.t('Update password') }}</button>
+    </form>
+  </div>
   `,
   styles: `.profile-form{display:block}.profile-form input,.profile-form textarea{max-width:100%;width:100%}`
 })
@@ -82,15 +104,20 @@ export class TrainerDashboardComponent implements OnInit {
 
   busy = signal(false);
   certBusy = signal(false);
+  pwBusy = signal(false);
+  profile = signal<Trainer | null>(null);
   certificates = signal<Certificate[]>([]);
   bookings = signal<Booking[]>([]);
+  upcomingCount = computed(() => this.bookings().filter(b => b.status === 'Confirmed').length);
 
   workingHours = ''; phone = ''; bio = ''; experienceYears = 0; photo = '';
   newTitle = ''; newIssuer = ''; newYear = new Date().getFullYear(); newCredentialId = '';
   selectedFile: File | null = null;
+  oldPassword = ''; newPassword = ''; confirm = '';
 
   ngOnInit() {
     this.api.myTrainerProfile().subscribe((t: Trainer) => {
+      this.profile.set(t);
       this.workingHours = t.working_hours;
       this.phone = t.phone ?? '';
       this.bio = t.bio;
@@ -137,6 +164,15 @@ export class TrainerDashboardComponent implements OnInit {
     this.api.deleteCertificate(id).subscribe({
       next: () => this.certificates.update(list => list.filter(c => c.id !== id)),
       error: () => this.toast.show(this.i18n.t('Operation failed'), 'error')
+    });
+  }
+
+  changePassword() {
+    if (this.newPassword !== this.confirm) { this.toast.show(this.i18n.t('Passwords do not match'), 'error'); return; }
+    this.pwBusy.set(true);
+    this.api.changePassword({ old_password: this.oldPassword, new_password: this.newPassword, new_password_confirm: this.confirm }).subscribe({
+      next: () => { this.pwBusy.set(false); this.oldPassword = ''; this.newPassword = ''; this.confirm = ''; this.toast.show(this.i18n.t('Password updated'), 'success'); },
+      error: (e: HttpErrorResponse) => { this.pwBusy.set(false); this.toast.show((e.error as ApiError)?.message ?? this.i18n.t('Operation failed'), 'error'); }
     });
   }
 }

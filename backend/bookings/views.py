@@ -20,7 +20,7 @@ from .serializers import BookingSerializer, MemberSerializer, NotificationSerial
 from .models import Booking, Member, Notification, Payment, Profile, Review, Trainer, TrainerCertificate
 from .permissions import IsAdminRole, IsMemberRole, IsTrainerRole, role_of
 from .serializers import (BookingSerializer, CertificateSerializer, MemberSerializer, NotificationSerializer, ReviewSerializer, TrainerSerializer, TrainerSelfUpdateSerializer, TransactionSerializer)
-
+from .permissions import IsAdminRole, IsMemberOrTrainerRole, IsMemberRole, IsTrainerRole, role_of
 def auth_payload(user):
     token, _ = Token.objects.get_or_create(user=user)
     profile = user.profile
@@ -369,7 +369,7 @@ class ProfileView(APIView):
 
 
 class ChangePasswordView(APIView):
-    permission_classes = [IsMemberRole]
+    permission_classes = [IsMemberOrTrainerRole]
     def post(self, request):
         old = request.data.get('old_password', '')
         new = request.data.get('new_password', '')

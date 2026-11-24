@@ -2,7 +2,7 @@
   <a class="brand" [routerLink]="auth.user() ? auth.home() : '/login'"><span class="brand-mark" aria-hidden="true">F</span>Fit<span>Slot</span></a>
   @if (auth.user(); as u) {
     <nav class="links">
-      @if (u.role === 'member') {
+            @if (u.role === 'member') {
         <a routerLink="/home" routerLinkActive="active">{{i18n.t('Dashboard')}}</a>
         <a routerLink="/book" routerLinkActive="active">{{i18n.t('Book')}}</a>
         <a routerLink="/trainers" routerLinkActive="active">{{i18n.t('Trainers')}}</a>
@@ -10,6 +10,10 @@
         <a routerLink="/wallet" routerLinkActive="active">{{i18n.t('Wallet')}}</a>
         <a routerLink="/stats" routerLinkActive="active">{{i18n.t('Stats')}}</a>
         <a routerLink="/profile" routerLinkActive="active">{{i18n.t('Profile')}}</a>
+        <a routerLink="/news" routerLinkActive="active">{{i18n.t('News')}}</a>
+      } @else if (u.role === 'trainer') {
+        <a routerLink="/trainer" routerLinkActive="active">{{i18n.t('Dashboard')}}</a>
+        <a routerLink="/trainers" routerLinkActive="active">{{i18n.t('Trainers')}}</a>
         <a routerLink="/news" routerLinkActive="active">{{i18n.t('News')}}</a>
       } @else {
         <a routerLink="/admin" routerLinkActive="active">{{i18n.t('Dashboard')}}</a>

@@ -8,8 +8,9 @@ export const authGuard: CanActivateFn = () => {
   return auth.user() ? true : inject(Router).parseUrl('/login');
 };
 
-export const roleGuard = (role: Role): CanActivateFn => () => {
+export const roleGuard = (roles: Role | Role[]): CanActivateFn => () => {
   const auth = inject(AuthService);
   if (!auth.user()) return inject(Router).parseUrl('/login');
-  return auth.role() === role ? true : inject(Router).parseUrl(auth.home());
+  const allowed = Array.isArray(roles) ? roles : [roles];
+  return auth.role() && allowed.includes(auth.role()!) ? true : inject(Router).parseUrl(auth.home());
 };
